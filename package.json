@@ -6,7 +6,7 @@
   "scripts": {
     "jest": "jest --coverage",
     "babel": "babel --copy-files --out-dir dist src",
-    "build": "npm run test && npm run lint && npm run babel",
+    "build": "npm run babel",
     "prebuild": "npm run clean",
     "clean": "rm -rf dist",
     "fix-lint": "npm run lint -- --fix",
@@ -20,13 +20,18 @@
   "license": "UNLICENSED",
   "dependencies": {},
   "devDependencies": {
+    "@babel/cli": "^7.4.3",
+    "@babel/core": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
     "babel-eslint": "^8.0.0",
+    "babel-jest": "^24.8.0",
     "chai": "^4.1.0",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^4.1.0",
     "eslint-plugin-import": "^2.17.1",
     "eslint-plugin-prettier": "^3.0.1",
+    "jest": "^24.8.0",
     "prettier": "1.17.0"
   }
 }
