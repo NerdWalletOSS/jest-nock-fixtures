@@ -1,0 +1,6 @@
+.nyc-output
+/build
+/configs
+/coverage
+/dist
+/node_modules

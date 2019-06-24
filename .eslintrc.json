@@ -1,0 +1,3 @@
+{
+  "extends": "@nerdwallet/eslint-config"
+}
