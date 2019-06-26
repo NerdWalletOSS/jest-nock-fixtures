@@ -2,7 +2,7 @@
   "name": "@nerdwallet/jest-nock-fixtures",
   "description": "jest-nock-fixtures",
   "author": "benjroy <ballen@nerdwallet.com>",
-  "main": "dist/index.js",
+  "main": "index.js",
   "scripts": {
     "jest": "jest --coverage",
     "babel": "babel --copy-files --out-dir dist src",
@@ -11,27 +11,35 @@
     "clean": "rm -rf dist",
     "fix-lint": "npm run lint -- --fix",
     "lint": "eslint src --ext .js",
-    "test": "jest"
+    "test": "npm run jest --",
+    "test:wild": "JEST_NOCK_FIXTURES_MODE=wild npm run test --",
+    "test:record": "JEST_NOCK_FIXTURES_MODE=record npm run test --",
+    "test:lockdown": "JEST_NOCK_FIXTURES_MODE=lockdown npm run test --"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/NerdWallet/nwjs-jest-nock-fixtures.git"
   },
   "license": "UNLICENSED",
-  "dependencies": {},
+  "dependencies": {
+    "lodash": "^4.17.11",
+    "mkdirp": "^0.5.1",
+    "nock": "^10.0.6"
+  },
   "devDependencies": {
     "@babel/cli": "^7.4.3",
     "@babel/core": "^7.4.3",
     "@babel/preset-env": "^7.4.3",
     "babel-eslint": "^8.0.0",
     "babel-jest": "^24.8.0",
-    "chai": "^4.1.0",
+    "core-js": "^3.1.4",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^4.1.0",
     "eslint-plugin-import": "^2.17.1",
     "eslint-plugin-prettier": "^3.0.1",
     "jest": "^24.8.0",
+    "node-fetch": "^2.6.0",
     "prettier": "1.17.0"
   }
 }
