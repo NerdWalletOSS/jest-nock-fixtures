@@ -1,5 +1,5 @@
 /* '@nerdwallet/jest-nock-fixtures' */
-const createJestNockFixturesTestWrapper = require('..');
+const createJestNockFixturesTestWrapper = require('../src/jest-nock-fixtures');
 
 createJestNockFixturesTestWrapper({
   unmatchedErrorMessage: reqs =>

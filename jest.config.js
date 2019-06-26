@@ -8,11 +8,6 @@ const BASE_CONFIG = {
   moduleFileExtensions: ['jsx', 'js', 'json', 'node'],
   modulePathIgnorePatterns: ['build', 'npm-cache', '.npm'],
   setupFilesAfterEnv: ['<rootDir>/config/setupTestFrameworkScriptFile.js'],
-  // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
-  transformIgnorePatterns: ['node_modules'],
-  transform: {
-    '^.+\\.(js|jsx)$': 'babel-jest',
-  },
   // ignore the folder where the fixtures are saved so they don't endlessly trigger re-runs in record mode
   watchPathIgnorePatterns: ['__nocks__'],
   // Indicates whether each individual test should be reported during the run
@@ -31,6 +26,7 @@ module.exports = {
     {
       ...BASE_CONFIG,
       displayName: 'other',
+      // store snapshots in `__snapshots__other__` instead of `__snapshots__`
       snapshotResolver: '<rootDir>/config/snapshotResolver-other.js',
       // The test environment that will be used for testing
       testEnvironment: 'node',

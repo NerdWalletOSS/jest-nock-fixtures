@@ -1,1 +1,1 @@
-module.exports = require('./jest-nock-fixtures');
+module.exports = require('./src/jest-nock-fixtures');
