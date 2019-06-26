@@ -49,7 +49,6 @@ function createNockFixturesTestWrapper(options = {}) {
   let unmatched = [];
   const handleUnmatchedRequest = req => unmatched.push(req);
 
-  // beforeAll(async () => {
   beforeAll(() => {
     if (isRecordingMode()) {
       nock.recorder.rec({
@@ -75,7 +74,6 @@ function createNockFixturesTestWrapper(options = {}) {
     }
   });
 
-  // afterAll(async () => {
   afterAll(() => {
     if (isRecordingMode()) {
       let recording = nock.recorder.play();
