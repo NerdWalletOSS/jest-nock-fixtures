@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/NerdWallet/nwjs-jest-nock-fixtures.git"
+    "url": "git+https://github.com/NerdWalletOSS/jest-nock-fixtures.git"
   },
   "license": "Apache-2.0",
   "dependencies": {
