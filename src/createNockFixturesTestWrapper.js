@@ -34,7 +34,8 @@ function createNockFixturesTestWrapper(options = {}) {
       }). Record fixtures and try again.`,
   } = options;
 
-  const fixtureDir = () => join(dirname(getTestPath()), getFixtureFolderName(fixtureFolderName));
+  const fixtureDir = () =>
+    join(dirname(getTestPath()), getFixtureFolderName(fixtureFolderName));
   const fixtureFilename = () => `${basename(getTestPath())}.json`;
   const fixtureFilepath = () => join(fixtureDir(), fixtureFilename());
 
@@ -58,10 +59,12 @@ function createNockFixturesTestWrapper(options = {}) {
     } else {
       if (!isWildMode() && existsSync(fixtureFilepath())) {
         // load and define mocks from previously recorded fixtures
-        const recordings = nock.loadDefs(fixtureFilepath())
+        const recordings = nock.loadDefs(fixtureFilepath());
         nock.define(recordings);
         console.warn( // eslint-disable-line no-console,prettier/prettier
-          `${logNamePrefix}: ${mode}: Defined (${recordings.length}) request mocks for definitions found in ${fixtureFilepath()}`
+          `${logNamePrefix}: ${mode}: Defined (${
+            recordings.length
+          }) request mocks for definitions found in ${fixtureFilepath()}`
         );
       }
 

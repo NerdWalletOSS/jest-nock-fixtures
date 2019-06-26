@@ -28,7 +28,9 @@ function getJestGlobalState() {
     }
     throw new Error(`jest global state at global[${globalStateKey}] not found`);
   }
-  throw new Error('jest-nock-fixtures requires Symbol type in language environment');
+  throw new Error(
+    'jest-nock-fixtures requires Symbol type in language environment'
+  );
 }
 
 function getJestGlobalTestPath() {
@@ -40,7 +42,9 @@ function getJestGlobalTestPath() {
 function getJestNockFixtureFolderName(fixtureFolderName) {
   const jestGlobalState = getJestGlobalState();
   const { state } = jestGlobalState;
-  const snapshotFolderName = basename(dirname(state.snapshotState._snapshotPath));
+  const snapshotFolderName = basename(
+    dirname(state.snapshotState._snapshotPath) // eslint-disable-line no-underscore-dangle
+  );
   return join(snapshotFolderName, fixtureFolderName);
 }
 
@@ -69,6 +73,6 @@ module.exports = function createJestNockFixturesTestWrapper(options) {
     beforeAll,
     afterAll,
   });
-}
+};
 
 module.exports.getJestNockFixtureFolderName = getJestNockFixtureFolderName;
