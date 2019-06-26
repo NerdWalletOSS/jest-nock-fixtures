@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`implementation should not allow external requests in CI 1`] = `
+Object {
+  "$id": "1",
+  "currentDateTime": "2019-06-26T00:28Z",
+  "currentFileTime": 132059825128361950,
+  "dayOfTheWeek": "Wednesday",
+  "isDayLightSavingsTime": false,
+  "ordinalDate": "2019-177",
+  "serviceResponse": null,
+  "timeZoneName": "UTC",
+  "utcOffset": "00:00:00",
+}
+`;
