@@ -1,4 +1,5 @@
 {
+  "version": "1.0.0",
   "name": "@nerdwallet/jest-nock-fixtures",
   "description": "jest-nock-fixtures",
   "author": "benjroy <ballen@nerdwallet.com>",
