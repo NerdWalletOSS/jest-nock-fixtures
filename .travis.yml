@@ -5,18 +5,23 @@ cache:
   directories:
     - node_modules
 
-script:
-  - npm run lint
-  - npm run build
-  - npm run test
-
 jobs:
   include:
+    - stage: test
+      script:
+        - npm run lint
+        - npm run build
+        - npm run test
+      after_success: echo "test stage success"
     - stage: npm release
       # Only run this job for tagged commits
       if: tag IS present
       node_js: "10"
-      script: echo "Publishing to npm..."
+      script:
+        - npm run lint
+        - npm run build
+        - npm run test
+        - echo "Publishing to npm..."
       deploy:
         provider: npm
         skip_cleanup: true
