@@ -12,8 +12,6 @@
 /coverage
 /Jenkinsfile
 /node_modules
-/README.md
-/src
 /test
 /VERSION
 CODEOWNERS
