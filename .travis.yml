@@ -1,32 +1,33 @@
 language: node_js
 node_js:
-  - 10
+- 10
 cache:
   directories:
-    - node_modules
-
+  - node_modules
 jobs:
   include:
-    - stage: test
-      script:
-        - npm run lint
-        - npm run build
-        - npm run test
-      after_success: echo "test stage success"
-    - stage: npm release
-      # Only run this job for tagged commits
-      if: tag IS present
-      node_js: "10"
-      script:
-        - npm run lint
-        - npm run build
-        - npm run test
-        - echo "Publishing to npm..."
-      deploy:
-        provider: npm
-        skip_cleanup: true
-        on:
-          tags: true
-        email: "npm@nerdwallet.com"
-        api_key:
-          secure: pVg+rCrDhJhU6wa9NvU1/rR+wI4vpYzqtT21tdFh+WJRbBLNz/ECfRKgIejp5zaSHcIXgsa+pZXwTHpldoYDBBnIQDb5NmEScurUBPwzmuwP0tMODxMnksv7ltTGqvwwdnfOH9gl/dKqXKZn65BL+xLmBaCXsGsQm9BlG1t4NK1kRHawLifu4jaHcuM1dJ1sLGSUqOry72Z7ZW2Io9vAHpUtxGYUN5wzUJtuOrtN2iRlW3py2A2mfzlQHNbWSH3yWywo1znOnmIvw2FeVnjmU3MPuDVi0SDtqm3JNNKX1fwTfAtSVrp8BHdcYa1oxtnBkDUJ7LdGwGCFtfEwrp0UCoJiHE8HbaJbltjoucJ9rXJ0oFzFWy8L7BJoG+4rHumqgYzCDinOfSTpj6OHydXf5Cn4hlnGP27nMH+bMMOfMUZCKDdnFjamk0Yi1XdsdwXqxWf7d+P7V3mvVh35c7PgR47sQ9HmMQQJXTPuoYxu+fRwkau7Q/eumHDCxFQBRWmLdwJf9aiNbUk19cKzO6emb1Xo3h8HOuc/Ib79p5P23LnHTLzFZnBt4xG7xBVap7FFRjfq2xgdTTYonoVZ7m306GQxydsJWXQMN09A/Qz9YhbQ+PiLMiJfjqL2dTGoVU/evhLhyCFD+snAvuJ3Ak6oW2CW+Sj9q0A3wovVE59ceWs=
+  - stage: test
+    script:
+    - npm run lint
+    - npm run build
+    - npm run test
+    after_success: echo "test stage success"
+  - stage: npm release
+    if: tag IS present
+    node_js: '10'
+    script:
+    - npm run lint
+    - npm run build
+    - npm run test
+    - echo "Publishing to npm..."
+    deploy:
+      provider: npm
+      skip_cleanup: true
+      on:
+        tags: true
+      email: npm@nerdwallet.com
+      api_key:
+        secure: pVg+rCrDhJhU6wa9NvU1/rR+wI4vpYzqtT21tdFh+WJRbBLNz/ECfRKgIejp5zaSHcIXgsa+pZXwTHpldoYDBBnIQDb5NmEScurUBPwzmuwP0tMODxMnksv7ltTGqvwwdnfOH9gl/dKqXKZn65BL+xLmBaCXsGsQm9BlG1t4NK1kRHawLifu4jaHcuM1dJ1sLGSUqOry72Z7ZW2Io9vAHpUtxGYUN5wzUJtuOrtN2iRlW3py2A2mfzlQHNbWSH3yWywo1znOnmIvw2FeVnjmU3MPuDVi0SDtqm3JNNKX1fwTfAtSVrp8BHdcYa1oxtnBkDUJ7LdGwGCFtfEwrp0UCoJiHE8HbaJbltjoucJ9rXJ0oFzFWy8L7BJoG+4rHumqgYzCDinOfSTpj6OHydXf5Cn4hlnGP27nMH+bMMOfMUZCKDdnFjamk0Yi1XdsdwXqxWf7d+P7V3mvVh35c7PgR47sQ9HmMQQJXTPuoYxu+fRwkau7Q/eumHDCxFQBRWmLdwJf9aiNbUk19cKzO6emb1Xo3h8HOuc/Ib79p5P23LnHTLzFZnBt4xG7xBVap7FFRjfq2xgdTTYonoVZ7m306GQxydsJWXQMN09A/Qz9YhbQ+PiLMiJfjqL2dTGoVU/evhLhyCFD+snAvuJ3Ak6oW2CW+Sj9q0A3wovVE59ceWs=
+deploy:
+  api_key:
+    secure: XWpG5RzTd8EfpU/OVPTHSGoFdaRSvB/qIr8yhwlOaLQVLjP0CI7b/D4hC4I7nU1uLsOqqcNyB+fZOk9qwuWxUpygb246ofemvEbK25BPQUzdBajnVI4gb3W9JL53xq/T/w200/7/88obJGOIlq7e7UtJx81ZGBBp6c8gEifOfsYMmFfaHg8WXqnfpvvFKmzK/aVRzq1RJGayN0Axzq+NAbcp54748/oDkO4QAMJqRTU80PtLj5bPQjF7LxRJLToJQgpSghiBm0Lk0XRvSHIgV7O+4IyUu5rigVkOjQh1L9neCyDsWdVK3LCVxgeCWx8hRoGC8iHSh/hDK+eP2TMPqrs0RhGBXzhrwO2xv1gCDtDJ2kJWh/AsxJKq/6y+tA7ODDb6jrRFBfgrlIiislOontApjCchwAzwhiG7mFpu/IQgYvT5z7Zr1yOY/tq7qu7ftiLyHAp/SeYx/6tkxFKW//UiYWJULk7fCOQ5vnRhQTDy9We4BmUqmk4a75HxwUlPsSAMAE0H22O8hwsMs+d2FtGH55GCS5mJVjcYq9LHju1+JENlc/Z1al6CsbbrpU++J20t/gOsug+5wIMyTn7vf7dWEO1c/JhGuyG3s87Hfr0Qq8f4W7gJRcbzqS9ZU5zjsNmnwAn10oMAywhfDt3Qq3Km1JTx9+f5KtdjK2Wjcak=
