@@ -1,11 +1,37 @@
 {
-  "version": "0.0.1",
+  "version": "1.0.0",
   "name": "@nerdwallet/jest-nock-fixtures",
   "description": "jest-nock-fixtures",
   "author": "benjroy <ballen@nerdwallet.com>",
-  "main": "dist/index.js",
-  "scripts": {},
+  "main": "index.js",
+  "scripts": {
+    "jest": "jest --config=jest.config.js --coverage",
+    "build": "true",
+    "fix-lint": "npm run lint -- --fix",
+    "lint": "eslint src --ext .js",
+    "test": "npm run jest --",
+    "test:wild": "JEST_NOCK_FIXTURES_MODE=wild npm run test --",
+    "test:record": "JEST_NOCK_FIXTURES_MODE=record npm run test --",
+    "test:lockdown": "JEST_NOCK_FIXTURES_MODE=lockdown npm run test --"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NerdWalletOSS/jest-nock-fixtures.git"
+  },
   "license": "Apache-2.0",
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "lodash": "^4.17.11",
+    "mkdirp": "^0.5.1",
+    "nock": "^10.0.6"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-import": "^2.17.1",
+    "eslint-plugin-prettier": "^3.0.1",
+    "jest": "^24.8.0",
+    "node-fetch": "^2.6.0",
+    "prettier": "1.17.0"
+  }
 }
