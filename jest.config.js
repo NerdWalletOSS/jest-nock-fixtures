@@ -6,7 +6,7 @@ const BASE_CONFIG = {
   coveragePathIgnorePatterns: ['/node_modules/', '/dist/', '/build/'],
   // An array of file extensions your modules use
   moduleFileExtensions: ['jsx', 'js', 'json', 'node'],
-  modulePathIgnorePatterns: ['build', 'npm-cache', '.npm'],
+  modulePathIgnorePatterns: ['<rootDir>/build', 'npm-cache', '.npm'],
   setupFilesAfterEnv: ['<rootDir>/config/setupTestFrameworkScriptFile.js'],
   // ignore the folder where the fixtures are saved so they don't endlessly trigger re-runs in record mode
   watchPathIgnorePatterns: ['__nocks__'],
