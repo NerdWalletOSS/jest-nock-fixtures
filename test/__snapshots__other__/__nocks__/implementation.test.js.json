@@ -2,11 +2,11 @@
     {
         "scope": "http://worldclockapi.com:80",
         "method": "GET",
-        "path": "/api/json/utc/now",
+        "path": "/api/json/est/now",
         "body": "",
         "status": 200,
         "response": [
-            "1f8b0800000000000400edbd07601c499625262f6dca7b7f4af54ad7e074a10880601324d8904010ecc188cde692ec1d69472329ab2a81ca6556655d661640cced9dbcf7de7befbdf7de7befbdf7ba3b9d4e27f7dfff3f5c6664016cf6ce4adac99e2180aac81f3f7e7c1f3f227ef147bf5b31fbe8d147bb1f8d3e9aaeeb3a5fb64fb3367f532c72fa746f67f7e1f6cea7db7b9fbed9d979b477f053d46add4ebf3c3f6ff296bea70ff97ff471d13ccdae9f1717f3f67576592c2f1a01719e954d3efa68965d7f79fe669e7f37cfdfd27bdfcd67cbbca10fe9c596dafd54b5cc5f6468ffd1576f4ee84345e559512a2abbf7f676ee3f3cd8bbbfbb7770efd3dd87f7ef8d3eaaea59b1cc4ae04b2f32aebb0f1ed0db4d5e5f16d3fc55deacaa65435f2ed765f94bfe1f1a52daf9eb000000"
+            "1f8b0800000000000400edbd07601c499625262f6dca7b7f4af54ad7e074a10880601324d8904010ecc188cde692ec1d69472329ab2a81ca6556655d661640cced9dbcf7de7befbdf7de7befbdf7ba3b9d4e27f7dfff3f5c6664016cf6ce4adac99e2180aac81f3f7e7c1f3f227ef147bf5b31fbe8d147bb1f8d3e9aaeeb3a5fb64fb3367f532c72fa746f67f7e1f6cec1f6dece9bdd4f1fedef6defec3fdad9a1a6eb76fae5f97993b7d4483ea4ffd1e745f334bb7e5e5cccdbd7d965b1bc6804505baff3d147b3ecfacbf337f3fcbb79fe96de7bb3ce1bfa88de6aa9d14f55cbfc4586c61f9d664d9bd7cbf4759b2d67593d4b1988c5ef59512a7ebbf7f676771e3cdc7bb8f7e98387f73e7d78b037faa8aa67c5322b310802c503d8bbb7476f37797d594cf35779b3aa960d7db95c97e52ff97f0097be581600010000"
         ],
         "rawHeaders": [
             "Cache-Control",
@@ -14,7 +14,7 @@
             "Pragma",
             "no-cache",
             "Content-Length",
-            "305",
+            "318",
             "Content-Type",
             "application/json; charset=utf-8",
             "Content-Encoding",
@@ -30,7 +30,43 @@
             "X-Powered-By",
             "ASP.NET",
             "Date",
-            "Wed, 26 Jun 2019 00:28:32 GMT",
+            "Tue, 20 Aug 2019 20:42:05 GMT",
+            "Connection",
+            "close"
+        ]
+    },
+    {
+        "scope": "http://worldclockapi.com:80",
+        "method": "GET",
+        "path": "/api/json/utc/now",
+        "body": "",
+        "status": 200,
+        "response": [
+            "1f8b0800000000000400edbd07601c499625262f6dca7b7f4af54ad7e074a10880601324d8904010ecc188cde692ec1d69472329ab2a81ca6556655d661640cced9dbcf7de7befbdf7de7befbdf7ba3b9d4e27f7dfff3f5c6664016cf6ce4adac99e2180aac81f3f7e7c1f3f227ef147bf5b31fbe8d147bb1f8d3e9aaeeb3a5fb64fb3367f532c72fa746f67f7e1f6cec1f6dece9bbd9d47fb7b3f45add6edf4cbf3f3266fe9fb9d9d47fc3ffab8689e66d7cf8b8b79fb3abb2c96178d8038cfca261f7d34cbaebf3c7f33cfbf9be76fe9bd37ebbca18fe8b5965afd54b5cc5f6468fdd1576f4ee84345e459512a22bbf7f676770e761edcdbfbf4d3fbf776eedfbf3ffaa8aa67c5322b812dbdc898eedddba3b79bbcbe2ca6f9abbc5955cb86be5caecbf297fc3f5ca8a1cee9000000"
+        ],
+        "rawHeaders": [
+            "Cache-Control",
+            "no-cache",
+            "Pragma",
+            "no-cache",
+            "Content-Length",
+            "304",
+            "Content-Type",
+            "application/json; charset=utf-8",
+            "Content-Encoding",
+            "gzip",
+            "Expires",
+            "-1",
+            "Vary",
+            "Accept-Encoding",
+            "Server",
+            "Microsoft-IIS/10.0",
+            "X-AspNet-Version",
+            "4.0.30319",
+            "X-Powered-By",
+            "ASP.NET",
+            "Date",
+            "Tue, 20 Aug 2019 20:42:06 GMT",
             "Connection",
             "close"
         ]

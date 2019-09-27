@@ -16,6 +16,9 @@ const BASE_CONFIG = {
 };
 
 module.exports = {
+  // apply the preset
+  preset: '<rootDir>',
+
   projects: [
     {
       ...BASE_CONFIG,

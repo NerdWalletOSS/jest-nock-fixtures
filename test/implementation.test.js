@@ -12,4 +12,10 @@ describe('implementation', () => {
     const json = await res.json();
     expect(json).toMatchSnapshot();
   });
+
+  it('Hi here is another', async () => {
+    const res = await fetch('http://worldclockapi.com/api/json/est/now');
+    const json = await res.json();
+    expect(json).toMatchSnapshot();
+  });
 });
