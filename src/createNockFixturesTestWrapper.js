@@ -29,9 +29,7 @@ function createNockFixturesTestWrapper(options = {}) {
       );
     },
     unmatchedErrorMessage = unmatchedRequests =>
-      `unmatched requests not allowed (found ${
-        unmatchedRequests.length
-      }). Record fixtures and try again.`,
+      `unmatched requests not allowed (found ${unmatchedRequests}). Record fixtures and try again.`,
   } = options;
 
   const fixtureDir = () =>
@@ -114,6 +112,8 @@ function createNockFixturesTestWrapper(options = {}) {
       }
     }
 
+    const unmatchedLength = unmatched.length;
+
     // full cleanup
     nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
     unmatched = [];
@@ -121,14 +121,14 @@ function createNockFixturesTestWrapper(options = {}) {
     nock.enableNetConnect();
 
     // report about unmatched requests
-    if (unmatched.length) {
+    if (unmatchedLength) {
       if (isLockdownMode()) {
         throw new Error(
-          `${logNamePrefix}: ${mode}: ${unmatchedErrorMessage(unmatched)}`
+          `${logNamePrefix}: ${mode}: ${unmatchedErrorMessage(unmatchedLength)}`
         );
       } else if (isDryrunMode()) {
         console.warn( // eslint-disable-line no-console,prettier/prettier
-          `${logNamePrefix}: ${mode}: ${unmatched.length} unmatched requests`
+          `${logNamePrefix}: ${mode}: ${unmatchedLength} unmatched requests`
         );
       }
     }
