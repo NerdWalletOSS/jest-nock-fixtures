@@ -114,7 +114,7 @@ function createNockFixturesTestWrapper(options = {}) {
       }
     }
 
-    const unmatchedLength = unmatched.length;
+    const cachedUnmatched = unmatched;
 
     // full cleanup
     nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
@@ -123,17 +123,19 @@ function createNockFixturesTestWrapper(options = {}) {
     nock.enableNetConnect();
 
     // report about unmatched requests
-    if (unmatchedLength) {
+    if (cachedUnmatched.length) {
       if (isLockdownMode()) {
         throw new Error(
           `${logNamePrefix}: ${mode}: ${unmatchedErrorMessage(
-            unmatchedLength,
+            cachedUnmatched,
             fixtureFilepath()
           )}`
         );
       } else if (isDryrunMode()) {
         console.warn( // eslint-disable-line no-console,prettier/prettier
-          `${logNamePrefix}: ${mode}: ${unmatchedLength} unmatched requests`
+          `${logNamePrefix}: ${mode}: ${
+            cachedUnmatched.length
+          } unmatched requests`
         );
       }
     }
