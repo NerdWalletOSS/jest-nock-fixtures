@@ -1,4 +1,4 @@
-## 1.0.3 (2020-10-08) brian123zx
+## 1.1.0 (2020-10-09) brian123zx
 
 - When nocks encounters a number of unmatched requests, the error function it calls now includes the path it expects to find the nock file at.
 - Fixes a bug introduced in v1.0.2 where the first argument to `unmatchedErrorMessage` was the length of the unmatched request array instead of the array itself
