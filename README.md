@@ -31,7 +31,7 @@ optionally, the error message that is thrown in `lockdown` mode can be configure
 const createJestNockFixturesTestWrapper = require('@nerdwallet/jest-nock-fixtures');
 
 createJestNockFixturesTestWrapper({
-  unmatchedErrorMessage: (reqs, fixtureFilepath) =>
+  unmatchedErrorMessage: (reqs, { fixtureFilepath }) =>
     `unmatched requests not allowed (found ${
       reqs.length
     }).\n\nRun \`npm run test:record\` to update fixtures, and try again.`

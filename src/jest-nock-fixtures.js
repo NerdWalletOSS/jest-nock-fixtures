@@ -55,7 +55,7 @@ module.exports = function createJestNockFixturesTestWrapper(options) {
     getFixtureFolderName = getJestNockFixtureFolderName,
     getTestPath = getJestGlobalTestPath,
     logNamePrefix = 'jest-nock-fixtures',
-    unmatchedErrorMessage = (reqs, fixtureFilepath) =>
+    unmatchedErrorMessage = (reqs, { fixtureFilepath }) =>
       `unmatched requests not allowed (found ${
         reqs.length
       }). Looking for fixtures at ${fixtureFilepath}\n\nRun with env variable \`JEST_NOCK_FIXTURES_MODE=record\` to update fixtures.`,

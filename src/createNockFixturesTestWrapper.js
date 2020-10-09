@@ -28,7 +28,7 @@ function createNockFixturesTestWrapper(options = {}) {
         'createNockFixturesTestWrapper: options.getTestPath must be a function'
       );
     },
-    unmatchedErrorMessage = (unmatchedRequests, fixtureFilepath) =>
+    unmatchedErrorMessage = (unmatchedRequests, { fixtureFilepath }) =>
       `unmatched requests not allowed (found ${
         unmatchedRequests.length
       }). Looking for fixtures at ${fixtureFilepath}. Record fixtures and try again.`,
@@ -126,10 +126,9 @@ function createNockFixturesTestWrapper(options = {}) {
     if (cachedUnmatched.length) {
       if (isLockdownMode()) {
         throw new Error(
-          `${logNamePrefix}: ${mode}: ${unmatchedErrorMessage(
-            cachedUnmatched,
-            fixtureFilepath()
-          )}`
+          `${logNamePrefix}: ${mode}: ${unmatchedErrorMessage(cachedUnmatched, {
+            fixtureFilepath: fixtureFilepath(),
+          })}`
         );
       } else if (isDryrunMode()) {
         console.warn( // eslint-disable-line no-console,prettier/prettier
