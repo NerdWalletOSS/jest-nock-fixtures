@@ -28,8 +28,10 @@ function createNockFixturesTestWrapper(options = {}) {
         'createNockFixturesTestWrapper: options.getTestPath must be a function'
       );
     },
-    unmatchedErrorMessage = unmatchedRequests =>
-      `unmatched requests not allowed (found ${unmatchedRequests}). Record fixtures and try again.`,
+    unmatchedErrorMessage = (unmatchedRequests, { fixtureFilepath }) =>
+      `unmatched requests not allowed (found ${
+        unmatchedRequests.length
+      }). Looking for fixtures at ${fixtureFilepath}. Record fixtures and try again.`,
   } = options;
 
   const fixtureDir = () =>
@@ -112,7 +114,7 @@ function createNockFixturesTestWrapper(options = {}) {
       }
     }
 
-    const unmatchedLength = unmatched.length;
+    const cachedUnmatched = unmatched;
 
     // full cleanup
     nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
@@ -121,14 +123,18 @@ function createNockFixturesTestWrapper(options = {}) {
     nock.enableNetConnect();
 
     // report about unmatched requests
-    if (unmatchedLength) {
+    if (cachedUnmatched.length) {
       if (isLockdownMode()) {
         throw new Error(
-          `${logNamePrefix}: ${mode}: ${unmatchedErrorMessage(unmatchedLength)}`
+          `${logNamePrefix}: ${mode}: ${unmatchedErrorMessage(cachedUnmatched, {
+            fixtureFilepath: fixtureFilepath(),
+          })}`
         );
       } else if (isDryrunMode()) {
         console.warn( // eslint-disable-line no-console,prettier/prettier
-          `${logNamePrefix}: ${mode}: ${unmatchedLength} unmatched requests`
+          `${logNamePrefix}: ${mode}: ${
+            cachedUnmatched.length
+          } unmatched requests`
         );
       }
     }
