@@ -5,7 +5,8 @@
   "author": "benjroy <ballen@nerdwallet.com>",
   "main": "index.js",
   "scripts": {
-    "jest": "jest --config=jest.config.js --coverage",
+    "jest:coverage": "npm run jest -- --coverage",
+    "jest": "jest --config=jest.config.js",
     "build": "true",
     "fix-lint": "npm run lint -- --fix",
     "lint": "eslint src --ext .js",
@@ -22,9 +23,14 @@
   "dependencies": {
     "ansi-escapes": "^4.2.1",
     "chalk": "^2.4.2",
+    "json-stable-stringify": "^1.0.1",
     "lodash": "^4.17.11",
     "mkdirp": "^0.5.1",
-    "nock": "^10.0.6"
+    "murmurhash-js": "^1.0.0",
+    "nock": "^10.0.6",
+    "strip-ansi": "^5.2.0",
+    "url-parse": "^1.4.7",
+    "zlib": "^1.0.5"
   },
   "devDependencies": {
     "eslint": "^5.16.0",
