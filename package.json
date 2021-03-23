@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
+  "version": "1.1.1",
   "name": "@nerdwallet/jest-nock-fixtures",
   "description": "jest-nock-fixtures",
   "author": "benjroy <ballen@nerdwallet.com>",
@@ -20,18 +20,18 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "lodash": "^4.17.11",
-    "mkdirp": "^0.5.1",
+    "lodash": "^4.17.21",
+    "mkdirp": "^0.5.5",
     "nock": "^10.0.6"
   },
   "devDependencies": {
     "eslint": "^5.16.0",
-    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-airbnb-base": "^13.2.0",
     "eslint-config-prettier": "^4.1.0",
-    "eslint-plugin-import": "^2.17.1",
-    "eslint-plugin-prettier": "^3.0.1",
-    "jest": "^24.8.0",
-    "node-fetch": "^2.6.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-prettier": "^3.3.1",
+    "jest": "^24.9.0",
+    "node-fetch": "^2.6.1",
     "prettier": "1.17.0"
   }
 }

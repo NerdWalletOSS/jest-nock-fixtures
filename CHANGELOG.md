@@ -1,3 +1,7 @@
+## 1.1.1 (2021-03-23) benjroy
+
+- run `npm update` and `npm audit fix` to clear security warning from dependencies
+
 ## 1.1.0 (2020-10-09) brian123zx
 
 - When nocks encounters a number of unmatched requests, the error function it calls now includes the path it expects to find the nock file at.
