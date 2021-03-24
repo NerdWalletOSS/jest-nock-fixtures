@@ -1,24 +1,25 @@
 const { dirname, basename, join } = require('path');
 const createNockFixturesTestWrapper = require('./createNockFixturesTestWrapper');
+const { getMode } = require('./mode');
 
-// in CI:
-//   - LOCKDOWN
-//   - disallow all http calls that haven't been mocked (throws errors)
-//   - will fail tests if any `unmatched` (read: unmocked) requests are initiated
-if (process.env.CI) {
-  process.env.JEST_NOCK_FIXTURES_MODE = 'lockdown';
-}
+// // in CI:
+// //   - LOCKDOWN
+// //   - disallow all http calls that haven't been mocked (throws errors)
+// //   - will fail tests if any `unmatched` (read: unmocked) requests are initiated
+// if (process.env.CI) {
+//   process.env.JEST_NOCK_FIXTURES_MODE = 'lockdown';
+// }
 
-// NOT in CI:
-//   - use `npm run test:<mode>` to add matching JEST_NOCK_FIXTURES_MODE
-//   - remember to run `npm run test:record` when http calls change
+// // NOT in CI:
+// //   - use `npm run test:<mode>` to add matching JEST_NOCK_FIXTURES_MODE
+// //   - remember to run `npm run test:record` when http calls change
 
-// `JEST_NOCK_FIXTURES_MODE=dryrun` is default mode.
-//   explicitly/redundantly set it here and add this comment
-//   to help expose this to anyone reading this
-if (!process.env.JEST_NOCK_FIXTURES_MODE) {
-  process.env.JEST_NOCK_FIXTURES_MODE = 'dryrun';
-}
+// // `JEST_NOCK_FIXTURES_MODE=dryrun` is default mode.
+// //   explicitly/redundantly set it here and add this comment
+// //   to help expose this to anyone reading this
+// if (!process.env.JEST_NOCK_FIXTURES_MODE) {
+//   process.env.JEST_NOCK_FIXTURES_MODE = 'dryrun';
+// }
 
 function getJestGlobalState() {
   if (Symbol && typeof Symbol.for === 'function') {
@@ -50,7 +51,8 @@ function getJestNockFixtureFolderName(fixtureFolderName) {
 
 module.exports = function createJestNockFixturesTestWrapper(options) {
   const {
-    mode = process.env.JEST_NOCK_FIXTURES_MODE,
+    // mode = process.env.JEST_NOCK_FIXTURES_MODE,
+    mode = getMode(),
     fixtureFolderName = '__nocks__',
     getFixtureFolderName = getJestNockFixtureFolderName,
     getTestPath = getJestGlobalTestPath,
@@ -61,7 +63,16 @@ module.exports = function createJestNockFixturesTestWrapper(options) {
       }). Looking for fixtures at ${fixtureFilepath}\n\nRun with env variable \`JEST_NOCK_FIXTURES_MODE=record\` to update fixtures.`,
     beforeAll = global.beforeAll,
     afterAll = global.afterAll,
+    // TODO: added
+    beforeEach = global.beforeEach,
+    afterEach = global.afterEach,
   } = options;
+
+  console.log('createJestNockFixturesTestWrapper', {
+    mode,
+    getMode: getMode(),
+    env: process.env.JEST_NOCK_FIXTURES_MODE
+  })
 
   return createNockFixturesTestWrapper({
     mode,
@@ -72,6 +83,9 @@ module.exports = function createJestNockFixturesTestWrapper(options) {
     logNamePrefix,
     beforeAll,
     afterAll,
+    // TODO: added
+    beforeEach,
+    afterEach,
   });
 };
 

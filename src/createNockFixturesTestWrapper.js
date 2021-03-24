@@ -18,6 +18,10 @@ function createNockFixturesTestWrapper(options = {}) {
   const {
     beforeAll,
     afterAll,
+    // // TODO: added
+    beforeEach,
+    afterEach,
+    // // end TODO: added
     fixtureFolderName = '__nocks__',
     // by default this is passed the `fixtureFolderName` supplied above
     getFixtureFolderName = folderName => folderName,
@@ -36,6 +40,8 @@ function createNockFixturesTestWrapper(options = {}) {
 
   const fixtureDir = () =>
     join(dirname(getTestPath()), getFixtureFolderName(fixtureFolderName));
+  // TODO: this was tweaked for development
+  // const fixtureFilename = () => `${basename(getTestPath())}.nock.json`;
   const fixtureFilename = () => `${basename(getTestPath())}.json`;
   const fixtureFilepath = () => join(fixtureDir(), fixtureFilename());
 
@@ -50,16 +56,41 @@ function createNockFixturesTestWrapper(options = {}) {
   let unmatched = [];
   const handleUnmatchedRequest = req => unmatched.push(req);
 
+  // // https://github.com/nock/nock/issues/2057#issuecomment-666494539
+  // beforeEach(() => nock.cleanAll()) // Removes mocks between unit tests so they run in isolation
+
+  // afterAll(() => { // Run every time all the tests of a file have finished running
+  //     nock.restore(); // Avoids memory-leaks
+  // });
+  
+  // beforeAll(() => {
+  //     nock.activate();
+  //     nock.enableNetConnect();
+  // });
+
+
+  beforeEach(() => {
+    // nock.cleanAll();
+  });
+
   beforeAll(() => {
+    if (!nock.isActive()) {
+      nock.activate();
+      nock.enableNetConnect();
+    }
+
     if (isRecordingMode()) {
       nock.recorder.rec({
         dont_print: true,
         output_objects: true,
       });
     } else {
+      console.log('fixtureFilepath()', fixtureFilepath())
       if (!isWildMode() && existsSync(fixtureFilepath())) {
+        console.log('calling nock.define');
         // load and define mocks from previously recorded fixtures
         const recordings = nock.loadDefs(fixtureFilepath());
+        console.log('recordings', recordings);
         nock.define(recordings);
         console.warn( // eslint-disable-line no-console,prettier/prettier
           `${logNamePrefix}: ${mode}: Defined (${
@@ -72,16 +103,22 @@ function createNockFixturesTestWrapper(options = {}) {
       nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
 
       if (isLockdownMode()) {
+        console.warn("LOCKDOWN MODE");
         nock.disableNetConnect();
+      } else {
+        console.warn('NOT LOCKDOWN MODE')
       }
     }
   });
 
   afterAll(() => {
+    // Avoid memory-leaks: https://github.com/nock/nock/issues/2057#issuecomment-666494539
+    nock.restore();
+
     if (isRecordingMode()) {
       let recording = nock.recorder.play();
       nock.recorder.clear();
-      nock.restore();
+      // nock.restore();
 
       if (recording.length > 0) {
         // ensure fixtures folder exists
@@ -116,6 +153,8 @@ function createNockFixturesTestWrapper(options = {}) {
 
     const cachedUnmatched = unmatched;
 
+    // TODO: added this
+    // nock.restore(); // Avoids memory-leaks
     // full cleanup
     nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
     unmatched = [];
