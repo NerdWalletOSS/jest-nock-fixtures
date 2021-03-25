@@ -3,7 +3,9 @@ const { existsSync, writeFileSync, unlinkSync, rmdirSync } = require('fs');
 const { sortBy } = require('lodash');
 const mkdirp = require('mkdirp'); // eslint-disable-line import/no-extraneous-dependencies
 const nock = require('nock'); // eslint-disable-line import/no-extraneous-dependencies
+const stableHash = require('./stableHash');
 
+// TODO:  there is a ./mode file now.  use that.
 const MODES = {
   DRYRUN: 'dryrun',
   LOCKDOWN: 'lockdown',
@@ -64,20 +66,29 @@ function createNockFixturesTestWrapper(options = {}) {
   // });
   
   // beforeAll(() => {
+  //   if (!nock.isActive()) {
   //     nock.activate();
-  //     nock.enableNetConnect();
+  //     // nock.enableNetConnect();
+  //   }
+  //     // nock.activate();
+  //     // nock.enableNetConnect();
   // });
 
 
-  beforeEach(() => {
-    // nock.cleanAll();
-  });
+  // beforeEach(() => {
+  //   nock.cleanAll();
+  // });
 
   beforeAll(() => {
     if (!nock.isActive()) {
       nock.activate();
-      nock.enableNetConnect();
+      // nock.enableNetConnect();
     }
+  });
+
+  beforeEach(() => {
+
+    nock.enableNetConnect();
 
     if (isRecordingMode()) {
       nock.recorder.rec({
@@ -106,12 +117,13 @@ function createNockFixturesTestWrapper(options = {}) {
         console.warn("LOCKDOWN MODE");
         nock.disableNetConnect();
       } else {
+        nock.enableNetConnect();
         console.warn('NOT LOCKDOWN MODE')
       }
     }
   });
 
-  afterAll(() => {
+  afterEach(() => {
     // Avoid memory-leaks: https://github.com/nock/nock/issues/2057#issuecomment-666494539
     nock.restore();
 
@@ -150,7 +162,9 @@ function createNockFixturesTestWrapper(options = {}) {
         }
       }
     }
+  });
 
+  afterAll(() => {
     const cachedUnmatched = unmatched;
 
     // TODO: added this
@@ -160,9 +174,12 @@ function createNockFixturesTestWrapper(options = {}) {
     unmatched = [];
     nock.cleanAll();
     nock.enableNetConnect();
-
+    console.log('unmatched', unmatched);
     // report about unmatched requests
     if (cachedUnmatched.length) {
+      // console.log('found unmatched.  here they are hashed',
+      //   cachedUnmatched.map((c) => stableHash(c))
+      // );
       if (isLockdownMode()) {
         throw new Error(
           `${logNamePrefix}: ${mode}: ${unmatchedErrorMessage(cachedUnmatched, {
