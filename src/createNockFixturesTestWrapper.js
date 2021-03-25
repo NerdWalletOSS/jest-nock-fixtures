@@ -4,6 +4,7 @@ const { sortBy } = require('lodash');
 const mkdirp = require('mkdirp'); // eslint-disable-line import/no-extraneous-dependencies
 const nock = require('nock'); // eslint-disable-line import/no-extraneous-dependencies
 const stableHash = require('./stableHash');
+const { yellow, red } = require("chalk");
 
 const { pendingMocks, activeMocks } = nock;
 
@@ -63,7 +64,7 @@ function createNockFixturesTestWrapper(options = {}) {
   // and to fail the tests in 'lockdown' mode (most useful in CI)
   let unmatched = [];
   const handleUnmatchedRequest = req => {
-    console.warn('HANDLE UNMATCHED');
+    console.log(yellow('HANDLE UNMATCHED'));
     unmatched.push(req);
   }
 
@@ -149,15 +150,20 @@ function createNockFixturesTestWrapper(options = {}) {
 
     nock.enableNetConnect();
 
+    // TODO: what happens if i always record?
+    nock.recorder.rec({
+      dont_print: true,
+      output_objects: true,
+    });
+
     if (isRecordingMode()) {
-      nock.recorder.rec({
-        dont_print: true,
-        output_objects: true,
-      });
+      // nock.recorder.rec({
+      //   dont_print: true,
+      //   output_objects: true,
+      // });
     } else {
       console.log('fixtureFilepath()', fixtureFilepath())
       if (!isWildMode() && existsSync(fixtureFilepath())) {
-        console.warn('calling nock.define');
         // load and define mocks from previously recorded fixtures
         // const recordings = nock.loadDefs(fixtureFilepath());
         // TODO: make this fixture load in beforeAll
@@ -166,13 +172,13 @@ function createNockFixturesTestWrapper(options = {}) {
         console.log('LOADED RECORDINGS', recordings);
         console.log('recordings', recordings && recordings.length);
         nock.define(recordings);
-        console.warn( // eslint-disable-line no-console,prettier/prettier
-          `${logNamePrefix}: ${mode}: Defined (${
+        console.log( // eslint-disable-line no-console,prettier/prettier
+          yellow(`${logNamePrefix}: ${mode}: Defined (${
             recordings.length
-          }) request mocks for definitions found in ${fixtureFilepath()}`
+          }) request mocks for definitions found in ${fixtureFilepath()}`)
         );
       } else {
-        console.error('CONDITION DID NOT PASS', 
+        console.log(red('CONDITION DID NOT PASS'), 
           !isWildMode(), existsSync(fixtureFilepath()),
           fixtureFilepath()
         )
@@ -183,11 +189,11 @@ function createNockFixturesTestWrapper(options = {}) {
       nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
 
       if (isLockdownMode()) {
-        console.warn("LOCKDOWN MODE");
+        console.log(yellow("LOCKDOWN MODE"));
         nock.disableNetConnect();
       } else {
         nock.enableNetConnect();
-        console.warn('NOT LOCKDOWN MODE')
+        console.log(yellow('NOT LOCKDOWN MODE'))
       }
     }
   });
@@ -201,25 +207,31 @@ function createNockFixturesTestWrapper(options = {}) {
       // // Avoid memory-leaks: https://github.com/nock/nock/issues/2057#issuecomment-666494539
     // nock.restore();
 
-    if (isRecordingMode()) {
-      let recording = nock.recorder.play();
-      nock.recorder.clear();
-      // nock.restore();
+    let recordings = nock.recorder.play();
+    console.log(yellow('recording.length', recordings.length));
+    nock.recorder.clear();
 
-      if (recording.length > 0) {
+    if (isRecordingMode()) {
+      // let recordings = nock.recorder.play();
+      // nock.recorder.clear();
+      // // nock.restore();
+
+      if (recordings.length > 0) {
         // // ensure fixtures folder exists
         // mkdirp.sync(fixtureDir());
         // // sort it
-        // // recording = sortBy(recording, ['status', 'scope', 'method', 'path', 'body']); // eslint-disable-line prettier/prettier
+        // // recordings = sortBy(recordings, ['status', 'scope', 'method', 'path', 'body']); // eslint-disable-line prettier/prettier
         // // write it
-        // writeFileSync(fixtureFilepath(), JSON.stringify(recording, null, 4));
-        captured[uniqueTestName] = recording;
+        // writeFileSync(fixtureFilepath(), JSON.stringify(recordings, null, 4));
+        captured[uniqueTestName] = recordings;
         // message what happened
-        console.warn( // eslint-disable-line no-console,prettier/prettier
-          `${logNamePrefix}: ${mode}: Recorded requests: ${recording.length}`
+        console.log( // eslint-disable-line no-console,prettier/prettier
+          yellow(
+            `${logNamePrefix}: ${mode}: Recorded requests: ${recordings.length}`
+          )
         );
       } else if (fixture.hasOwnProperty(uniqueTestName)) {
-        console.error('TODO: cleanup fixtures.hasOwnProperty(uniqueTestName)', uniqueTestName);
+        console.log(red('TODO: cleanup fixtures.hasOwnProperty(uniqueTestName)', uniqueTestName));
         delete fixture[uniqueTestName];
       }
       // } else if (existsSync(fixtureFilepath())) {
@@ -260,7 +272,7 @@ function createNockFixturesTestWrapper(options = {}) {
     });
 
     if (Object.keys(captured).length) {
-      console.warn('WRITING');
+      console.log(yellow('WRITING'));
       // ensure fixtures folder exists
       mkdirp.sync(fixtureDir());
       // sort it
@@ -275,9 +287,11 @@ function createNockFixturesTestWrapper(options = {}) {
       // const fixture = Object.assign({}, existingFixture, captured);
       writeFileSync(fixtureFilepath(), JSON.stringify(fixture, null, 2));
       // message what happened
-      console.warn( // eslint-disable-line no-console,prettier/prettier
-        // `${logNamePrefix}: ${mode}: Recorded requests: ${recording.length}`
-        `${logNamePrefix}: ${mode}: TODO: MESSAGE ABOUT FILE WRITTEN`
+      console.log( // eslint-disable-line no-console,prettier/prettier
+        yellow(
+          // `${logNamePrefix}: ${mode}: Recorded requests: ${recording.length}`
+          `${logNamePrefix}: ${mode}: TODO: MESSAGE ABOUT FILE WRITTEN`
+        )
       );
     // } else if (fixture.hasOwnProperty(uniqueTestName)) {
     //   console.error('TODO: fixtures.hasOwnProperty(uniqueTestName)', uniqueTestName);
@@ -287,10 +301,12 @@ function createNockFixturesTestWrapper(options = {}) {
     // }
     } else if (existsSync(fixtureFilepath())) {
       // cleanup obsolete nock fixture file and dir if they exist
-      console.warn( // eslint-disable-line no-console,prettier/prettier
-        `${logNamePrefix}: ${mode}: Nothing recorded, cleaning up ${fixtureFilepath()}.`
+      console.log( // eslint-disable-line no-console,prettier/prettier
+        yellow(
+          `${logNamePrefix}: ${mode}: Nothing recorded, cleaning up ${fixtureFilepath()}.`
+        )
       );
-      console.error('TODO: CLEANUP', uniqueTestName);
+      console.log(red('TODO: CLEANUP', uniqueTestName));
       // // remove the fixture file
       // unlinkSync(fixtureFilepath());
       // // remove the directory if not empty
@@ -314,15 +330,17 @@ function createNockFixturesTestWrapper(options = {}) {
       if (isLockdownMode()) {
         // throw new Error(
         console.error(
-            `${logNamePrefix}: ${mode}: ${unmatchedErrorMessage(cachedUnmatched, {
+          `${logNamePrefix}: ${mode}: ${unmatchedErrorMessage(cachedUnmatched, {
             fixtureFilepath: fixtureFilepath(),
           })}`
         );
       } else if (isDryrunMode()) {
-        console.warn( // eslint-disable-line no-console,prettier/prettier
-          `${logNamePrefix}: ${mode}: ${
-            cachedUnmatched.length
-          } unmatched requests`
+        console.log( // eslint-disable-line no-console,prettier/prettier
+          yellow(
+            `${logNamePrefix}: ${mode}: ${
+              cachedUnmatched.length
+            } unmatched requests`
+          )
         );
       }
     }
