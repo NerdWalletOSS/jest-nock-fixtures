@@ -1,5 +1,5 @@
 const { dirname, basename, join } = require('path');
-const { existsSync, writeFileSync, unlinkSync, rmdirSync } = require('fs');
+const { existsSync, readFileSync, writeFileSync, unlinkSync, rmdirSync } = require('fs');
 const { sortBy } = require('lodash');
 const mkdirp = require('mkdirp'); // eslint-disable-line import/no-extraneous-dependencies
 const nock = require('nock'); // eslint-disable-line import/no-extraneous-dependencies
@@ -98,18 +98,34 @@ function createNockFixturesTestWrapper(options = {}) {
     // nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
   });
 
+  let uniqueTestName;
+  // TODO: better comment
+  const uniqueTestNameCounters = new Map();
+  const captured = {};
+
   beforeEach(() => {
-    console.log('getCurrentTestName()',
-      {
-        getCurrentTestName: getCurrentTestName(),
-        'expect.getState()': expect.getState(),
-        'snapshotState': expect.getState().snapshotState,
-      },
-    );
+    // console.log('getCurrentTestName()',
+    //   {
+    //     getCurrentTestName: getCurrentTestName(),
+    //     'expect.getState()': expect.getState(),
+    //     'snapshotState': expect.getState().snapshotState,
+    //   },
+    // );
+
+    const testName = getCurrentTestName();
+    const ct = (uniqueTestNameCounters.get(testName) || 0) + 1;
+    uniqueTestName = `${testName} ${ct}`;
+    uniqueTestNameCounters.set(testName, ct);
+
+    // console.log('uniqueTestNameCounters', {
+    //   uniqueTestName,
+    //   uniqueTestNameCounters,
+    // });
+
     console.log('be pre restore', {
       pendingMocks: pendingMocks(),
       activeMocks: activeMocks(),
-    })
+    });
     nock.restore();
     console.log('be AFTER restore', {
       pendingMocks: pendingMocks(),
@@ -130,16 +146,25 @@ function createNockFixturesTestWrapper(options = {}) {
     } else {
       console.log('fixtureFilepath()', fixtureFilepath())
       if (!isWildMode() && existsSync(fixtureFilepath())) {
-        console.log('calling nock.define');
+        console.warn('calling nock.define');
         // load and define mocks from previously recorded fixtures
-        const recordings = nock.loadDefs(fixtureFilepath());
-        console.log('recordings', recordings.length);
+        // const recordings = nock.loadDefs(fixtureFilepath());
+        // TODO: make this fixture load in beforeAll
+        const fixture = nock.loadDefs(fixtureFilepath());
+        const recordings = fixture[uniqueTestName];
+        console.log('LOADED RECORDINGS', recordings);
+        console.log('recordings', recordings && recordings.length);
         nock.define(recordings);
         console.warn( // eslint-disable-line no-console,prettier/prettier
           `${logNamePrefix}: ${mode}: Defined (${
             recordings.length
           }) request mocks for definitions found in ${fixtureFilepath()}`
         );
+      } else {
+        console.error('CONDITION DID NOT PASS', 
+          !isWildMode(), existsSync(fixtureFilepath()),
+          fixtureFilepath()
+        )
       }
 
       // track requests that were not mocked
@@ -156,8 +181,12 @@ function createNockFixturesTestWrapper(options = {}) {
     }
   });
 
-  // afterEach(() => {
-  afterAll(() => {
+  afterEach(() => {
+    console.log('afterEach', {
+      uniqueTestName,
+    })
+  // });
+  // afterAll(() => {
       // // Avoid memory-leaks: https://github.com/nock/nock/issues/2057#issuecomment-666494539
     // nock.restore();
 
@@ -167,38 +196,40 @@ function createNockFixturesTestWrapper(options = {}) {
       // nock.restore();
 
       if (recording.length > 0) {
-        // ensure fixtures folder exists
-        mkdirp.sync(fixtureDir());
-        // sort it
-        // recording = sortBy(recording, ['status', 'scope', 'method', 'path', 'body']); // eslint-disable-line prettier/prettier
-        // write it
-        writeFileSync(fixtureFilepath(), JSON.stringify(recording, null, 4));
+        // // ensure fixtures folder exists
+        // mkdirp.sync(fixtureDir());
+        // // sort it
+        // // recording = sortBy(recording, ['status', 'scope', 'method', 'path', 'body']); // eslint-disable-line prettier/prettier
+        // // write it
+        // writeFileSync(fixtureFilepath(), JSON.stringify(recording, null, 4));
+        captured[uniqueTestName] = recording;
         // message what happened
         console.warn( // eslint-disable-line no-console,prettier/prettier
           `${logNamePrefix}: ${mode}: Recorded requests: ${recording.length}`
         );
-      } else if (existsSync(fixtureFilepath())) {
-        // cleanup obsolete nock fixture file and dir if they exist
-        console.warn( // eslint-disable-line no-console,prettier/prettier
-          `${logNamePrefix}: ${mode}: Nothing recorded, cleaning up ${fixtureFilepath()}.`
-        );
-        // remove the fixture file
-        unlinkSync(fixtureFilepath());
-        // remove the directory if not empty
-        try {
-          rmdirSync(fixtureDir());
-          // message what happened
-          console.warn( // eslint-disable-line no-console,prettier/prettier
-            `${logNamePrefix}: ${mode}: Cleaned up ${fixtureDir()} because no fixtures were left.`
-          );
-        } catch (err) {
-          if (err.code !== 'ENOTEMPTY') throw err;
-        }
       }
+      // } else if (existsSync(fixtureFilepath())) {
+      //   // // cleanup obsolete nock fixture file and dir if they exist
+      //   // console.warn( // eslint-disable-line no-console,prettier/prettier
+      //   //   `${logNamePrefix}: ${mode}: Nothing recorded, cleaning up ${fixtureFilepath()}.`
+      //   // );
+      //   // // remove the fixture file
+      //   // unlinkSync(fixtureFilepath());
+      //   // // remove the directory if not empty
+      //   // try {
+      //   //   rmdirSync(fixtureDir());
+      //   //   // message what happened
+      //   //   console.warn( // eslint-disable-line no-console,prettier/prettier
+      //   //     `${logNamePrefix}: ${mode}: Cleaned up ${fixtureDir()} because no fixtures were left.`
+      //   //   );
+      //   // } catch (err) {
+      //   //   if (err.code !== 'ENOTEMPTY') throw err;
+      //   // }
+      // }
     }
-  // });
+  });
 
-  // afterAll(() => {
+  afterAll(() => {
     const cachedUnmatched = unmatched;
 
     // TODO: added this
@@ -209,6 +240,50 @@ function createNockFixturesTestWrapper(options = {}) {
     unmatched = [];
     nock.cleanAll();
     nock.enableNetConnect();
+
+    console.log('after all', {
+      captured
+    });
+
+    if (Object.keys(captured).length) {
+      console.warn('WRITING');
+        // ensure fixtures folder exists
+        mkdirp.sync(fixtureDir());
+        // sort it
+        // recording = sortBy(recording, ['status', 'scope', 'method', 'path', 'body']); // eslint-disable-line prettier/prettier
+        const fixture = existsSync(fixtureFilepath()) ? require(fixtureFilepath()) : {};
+        // write it
+        // writeFileSync(fixtureFilepath(), JSON.stringify(recording, null, 4));
+        // merge keys in place
+        Object.keys(captured).forEach(
+          (name) => { fixture[name] = captured[name]; },
+        );
+        // const fixture = Object.assign({}, existingFixture, captured);
+        writeFileSync(fixtureFilepath(), JSON.stringify(fixture, null, 4));
+        // message what happened
+        console.warn( // eslint-disable-line no-console,prettier/prettier
+          // `${logNamePrefix}: ${mode}: Recorded requests: ${recording.length}`
+          `${logNamePrefix}: ${mode}: TODO: MESSAGE ABOUT FILE WRITTEN`
+        );
+    } else if (existsSync(fixtureFilepath())) {
+      // cleanup obsolete nock fixture file and dir if they exist
+      console.warn( // eslint-disable-line no-console,prettier/prettier
+        `${logNamePrefix}: ${mode}: Nothing recorded, cleaning up ${fixtureFilepath()}.`
+      );
+      console.error('TODO: CLEANUP');
+      // // remove the fixture file
+      // unlinkSync(fixtureFilepath());
+      // // remove the directory if not empty
+      // try {
+      //   rmdirSync(fixtureDir());
+      //   // message what happened
+      //   console.warn( // eslint-disable-line no-console,prettier/prettier
+      //     `${logNamePrefix}: ${mode}: Cleaned up ${fixtureDir()} because no fixtures were left.`
+      //   );
+      // } catch (err) {
+      //   if (err.code !== 'ENOTEMPTY') throw err;
+      // }
+    }
     // console.log('cachedUnmatched', cachedUnmatched);
     // report about unmatched requests
     if (cachedUnmatched.length) {
@@ -216,8 +291,9 @@ function createNockFixturesTestWrapper(options = {}) {
       //   cachedUnmatched.map((c) => stableHash(c))
       // );
       if (isLockdownMode()) {
-        throw new Error(
-          `${logNamePrefix}: ${mode}: ${unmatchedErrorMessage(cachedUnmatched, {
+        // throw new Error(
+        console.error(
+            `${logNamePrefix}: ${mode}: ${unmatchedErrorMessage(cachedUnmatched, {
             fixtureFilepath: fixtureFilepath(),
           })}`
         );
