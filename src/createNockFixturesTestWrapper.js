@@ -273,7 +273,7 @@ function createNockFixturesTestWrapper(options = {}) {
         (name) => { fixture[name] = captured[name]; },
       );
       // const fixture = Object.assign({}, existingFixture, captured);
-      writeFileSync(fixtureFilepath(), JSON.stringify(fixture, null, 4));
+      writeFileSync(fixtureFilepath(), JSON.stringify(fixture, null, 2));
       // message what happened
       console.warn( // eslint-disable-line no-console,prettier/prettier
         // `${logNamePrefix}: ${mode}: Recorded requests: ${recording.length}`
