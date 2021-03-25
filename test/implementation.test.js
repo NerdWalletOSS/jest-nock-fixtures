@@ -12,4 +12,43 @@ describe('implementation', () => {
     const json = await res.json();
     expect(json).toMatchSnapshot();
   });
+
+  it('Hi here is another', async () => {
+    // const res = await fetch('http://worldclockapi.com/api/json/est/now');
+    const res = await fetch('https://jsonplaceholder.typicode.com/todos/1');
+    // https://jsonplaceholder.typicode.com/todos/1
+    const json = await res.json();
+    expect(json).toMatchSnapshot();
+  });
+
+  it('AND here is another', async () => {
+    // const res = await fetch('http://worldclockapi.com/api/json/est/now');
+    const res = await fetch('https://jsonplaceholder.typicode.com/todos/1');
+    // https://jsonplaceholder.typicode.com/todos/1
+    const json = await res.json();
+    expect(json).toMatchSnapshot();
+  });
+
+  it('AND YET here is another', async () => {
+    const res = await fetch('http://worldclockapi.com/api/json/est/now');
+    // const res = await fetch('https://jsonplaceholder.typicode.com/todos/1');
+    // https://jsonplaceholder.typicode.com/todos/1
+    const json = await res.json();
+    expect(json).toMatchSnapshot();
+  });
+  it('AND YET here is another', async () => {
+    const res = await fetch('http://worldclockapi.com/api/json/est/now');
+    // const res = await fetch('https://jsonplaceholder.typicode.com/todos/1');
+    // https://jsonplaceholder.typicode.com/todos/1
+    const json = await res.json();
+    expect(json).toMatchSnapshot();
+  });
+  it('has no requests', async () => {
+    // const res = await fetch('http://worldclockapi.com/api/json/est/now');
+    // // const res = await fetch('https://jsonplaceholder.typicode.com/todos/1');
+    // // https://jsonplaceholder.typicode.com/todos/1
+    // const json = await res.json();
+    // expect(json).toMatchSnapshot();
+
+  });
 });

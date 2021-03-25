@@ -8,4 +8,6 @@ module.exports = {
 
   // ! Required for `r` shortcut
   watchPlugins: [require.resolve('./src/JestWatchPlugin')],
+  // ignore the folder where the fixtures are saved so they don't endlessly trigger re-runs in record mode
+  watchPathIgnorePatterns: ['__nocks__'],
 };

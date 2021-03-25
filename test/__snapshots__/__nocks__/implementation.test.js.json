@@ -7,7 +7,7 @@
             "body": "",
             "status": 200,
             "response": [
-                "1f8b0800000000000400edbd07601c499625262f6dca7b7f4af54ad7e074a10880601324d8904010ecc188cde692ec1d69472329ab2a81ca6556655d661640cced9dbcf7de7befbdf7de7befbdf7ba3b9d4e27f7dfff3f5c6664016cf6ce4adac99e2180aac81f3f7e7c1f3f227ef147bf5b31fbe8d147bb1f8d3e9aaeeb3a5fb64fb3367f532c72fa746f676f777be7def6defd377b3b8ff63ffd296ab56ea75f9e9f37794bdfefec3ce2ffd1c745f334bb7e5e5cccdbd7d965b1bc6804c4795636f9e8a35976fde5f99b79fedd3c7f4befbd99afeb863ea3f75a6af653d5327f91a1f9475fbd39a10f15936745a998ecdedbfb7477f7c1c1c1eea70ff6770fee7fba37faa8aa67c5322b812ebdc8a81eecd3cb4d5e5f16d3fc55deacaa6543df2dd765f94bfe1ffd7a6124e9000000"
+                "1f8b0800000000000400edbd07601c499625262f6dca7b7f4af54ad7e074a10880601324d8904010ecc188cde692ec1d69472329ab2a81ca6556655d661640cced9dbcf7de7befbdf7de7befbdf7ba3b9d4e27f7dfff3f5c6664016cf6ce4adac99e2180aac81f3f7e7c1f3f227ef147bf5b31fbe8d147bb1f8d3e9aaeeb3a5fb64fb3367f532c72fa746f676f777be7def6defd377bbb8f763efd296ab56ea75f9e9f37794bdfefec3ce2ffd1c745f334bb7e5e5cccdbd7d965b1bc6804c4795636f9e8a35976fde5f99b79fedd3c7f4befbd99afeb863ea3f75a6af653d5327f91a1f9475fbd39a10f15936745a998ecdedbfb7477f7c1c3870f1e7efae9a77b0f0e3e1d7d54d5b362999540975e64540ff6e9e526af2f8b69fe2a6f56d5b2a1ef96ebb2fc25ff0ffab779b3e9000000"
             ],
             "rawHeaders": [
                 "Cache-Control",
@@ -15,7 +15,7 @@
                 "Pragma",
                 "no-cache",
                 "Content-Length",
-                "304",
+                "305",
                 "Content-Type",
                 "application/json; charset=utf-8",
                 "Content-Encoding",
@@ -33,7 +33,7 @@
                 "Set-Cookie",
                 "ARRAffinity=5bfcb6977b1483ca163226cd3e571f990eb13447599cbcf2fbe0cf7b459489cc;Path=/;HttpOnly;Domain=worldclockapi.com",
                 "Date",
-                "Thu, 25 Mar 2021 20:46:56 GMT",
+                "Thu, 25 Mar 2021 21:06:19 GMT",
                 "Connection",
                 "close"
             ],
@@ -52,7 +52,7 @@
             ],
             "rawHeaders": [
                 "Date",
-                "Thu, 25 Mar 2021 20:46:57 GMT",
+                "Thu, 25 Mar 2021 21:06:19 GMT",
                 "Content-Type",
                 "application/json; charset=utf-8",
                 "Transfer-Encoding",
@@ -60,7 +60,7 @@
                 "Connection",
                 "close",
                 "Set-Cookie",
-                "__cfduid=d964cd25dbf598a164127d3cc6a7d8ec81616705216; expires=Sat, 24-Apr-21 20:46:56 GMT; path=/; domain=.typicode.com; HttpOnly; SameSite=Lax",
+                "__cfduid=dab7a7b3dfe2e6776e2a1fdf94c89009c1616706379; expires=Sat, 24-Apr-21 21:06:19 GMT; path=/; domain=.typicode.com; HttpOnly; SameSite=Lax",
                 "X-Powered-By",
                 "Express",
                 "X-Ratelimit-Limit",
@@ -88,19 +88,19 @@
                 "CF-Cache-Status",
                 "HIT",
                 "Age",
-                "18654",
+                "19816",
                 "cf-request-id",
-                "090cbcf9e20000eacb1a0d2000000001",
+                "090cceb854000042ded698f000000001",
                 "Expect-CT",
                 "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
                 "Report-To",
-                "{\"group\":\"cf-nel\",\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=DpBiswhjraNCvRWP3qMxPfFXCb%2B6EEdz8yU7DKWHZdIXUec5nCQHlVkvzB9OKvZsr%2BsCW%2B5ym3oyKcrpaClUOPP05FqPnq2NWMwC%2Fni0qmGGJwxGthvd5FFcTtXo\"}],\"max_age\":604800}",
+                "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=Zq%2FkndmNuW9MUlv3zJ2kPfTogYqYzJzkioHyCjJv6Gpq4IdCMa3uvKBomDVB11wM%2F5vt2nQnbx5XeUBC9eRCKadhpjBFZfdD0B5kg1oeCuWPe8V5qo0kaz8QYpgm\"}],\"group\":\"cf-nel\",\"max_age\":604800}",
                 "NEL",
-                "{\"report_to\":\"cf-nel\",\"max_age\":604800}",
+                "{\"max_age\":604800,\"report_to\":\"cf-nel\"}",
                 "Server",
                 "cloudflare",
                 "CF-RAY",
-                "635afdd63bceeacb-LAX",
+                "635b1a3a2ec142de-LAX",
                 "Content-Encoding",
                 "gzip",
                 "alt-svc",
@@ -121,7 +121,7 @@
             ],
             "rawHeaders": [
                 "Date",
-                "Thu, 25 Mar 2021 20:46:57 GMT",
+                "Thu, 25 Mar 2021 21:06:19 GMT",
                 "Content-Type",
                 "application/json; charset=utf-8",
                 "Transfer-Encoding",
@@ -129,7 +129,7 @@
                 "Connection",
                 "close",
                 "Set-Cookie",
-                "__cfduid=dd7be49f10da63ee596a57298d747e2931616705217; expires=Sat, 24-Apr-21 20:46:57 GMT; path=/; domain=.typicode.com; HttpOnly; SameSite=Lax",
+                "__cfduid=d1b1a06a2f6fe09afedc526b48ca7253e1616706379; expires=Sat, 24-Apr-21 21:06:19 GMT; path=/; domain=.typicode.com; HttpOnly; SameSite=Lax",
                 "X-Powered-By",
                 "Express",
                 "X-Ratelimit-Limit",
@@ -157,19 +157,19 @@
                 "CF-Cache-Status",
                 "HIT",
                 "Age",
-                "18654",
+                "19816",
                 "cf-request-id",
-                "090cbcfa590000eb040228e000000001",
+                "090cceb8c40000e7b1770ca000000001",
                 "Expect-CT",
                 "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
                 "Report-To",
-                "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=tDp%2B95pUZf%2BKc%2FUKFH%2BiX8TVUvx0lB07f75ZagDTiCdSGK83yqDX6sEg0duinXQSi2Cr6Hvub0vjpg4JFadZyJolKD8mb%2Bd1%2BFD%2FEKklzG7FV5VTpec3wIdlCWnT\"}],\"max_age\":604800,\"group\":\"cf-nel\"}",
+                "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=J5MVFt9ZAKTrZi%2Fiw%2BzGwNE6T%2BtyTwyklizASIx92gEB9MOgTO8LVglQT7oLgDOtRyTKuEGHnApRfx1t%2Fqe8iYbtdxL7jbAE6vAmMkJCwo3lipdA5v5krNjVQLhg\"}]}",
                 "NEL",
                 "{\"report_to\":\"cf-nel\",\"max_age\":604800}",
                 "Server",
                 "cloudflare",
                 "CF-RAY",
-                "635afdd6fda5eb04-LAX",
+                "635b1a3ad93ae7b1-LAX",
                 "Content-Encoding",
                 "gzip",
                 "alt-svc",
@@ -186,7 +186,7 @@
             "body": "",
             "status": 200,
             "response": [
-                "1f8b0800000000000400edbd07601c499625262f6dca7b7f4af54ad7e074a10880601324d8904010ecc188cde692ec1d69472329ab2a81ca6556655d661640cced9dbcf7de7befbdf7de7befbdf7ba3b9d4e27f7dfff3f5c6664016cf6ce4adac99e2180aac81f3f7e7c1f3f227ef147bf5b31fbe8d147bb1f8d3e9aaeeb3a5fb64fb3367f532c72fa746f676f777be7def6defd37bb9f3edaff747b67ffd1ce0e355db7d32fcfcf9bbca546f221fd8f3e2f9aa7d9f5f3e262debece2e8be5452380da7a9d8f3e9a65d75f9ebf99e7dfcdf3b7f4de9bf9ba6ee8337aada5563f552df317195a7f749a356d5e2fd3d76db69c65f52c652816c16745a908eededbfb7477f7d3fdfddd077b07070ff61eee8f3eaaea59b1cc4a8c8240f1080ef6e9e526af2f8b69fe2a6f56d5b2a1ef96ebb2fc25ff0fafd3629e00010000"
+                "1f8b0800000000000400edbd07601c499625262f6dca7b7f4af54ad7e074a10880601324d8904010ecc188cde692ec1d69472329ab2a81ca6556655d661640cced9dbcf7de7befbdf7de7befbdf7ba3b9d4e27f7dfff3f5c6664016cf6ce4adac99e2180aac81f3f7e7c1f3f227ef147bf5b31fbe8d147bb1f8d3e9aaeeb3a5fb64fb3367f532c72fa746f676f777be7def6defd37bb0f1eed1c6cefec3fdad9a1a6eb76fae5f97993b7d4483ea4ffd1e745f334bb7e5e5cccdbd7d965b1bc6804505baff3d147b3ecfacbf337f3fcbb79fe96de7b335fd70d7d46afb5d4eaa7aa65fe2243eb8f4eb3a6cdeb65fabacd96b3ac9ea50cc522f8ac2815c1dd7b7b9feeee7e7affc1dea7f7f6eeed1c3cd81f7d54d5b3629995180581e2111cecd3cb4d5e5f16d3fc55deacaa6543df2dd765f94bfe1f1179df3700010000"
             ],
             "rawHeaders": [
                 "Cache-Control",
@@ -212,7 +212,48 @@
                 "Set-Cookie",
                 "ARRAffinity=5bfcb6977b1483ca163226cd3e571f990eb13447599cbcf2fbe0cf7b459489cc;Path=/;HttpOnly;Domain=worldclockapi.com",
                 "Date",
-                "Thu, 25 Mar 2021 20:46:56 GMT",
+                "Thu, 25 Mar 2021 21:08:45 GMT",
+                "Connection",
+                "close"
+            ],
+            "responseIsBinary": false
+        }
+    ],
+    "implementation has no requests 1": [
+        {
+            "scope": "http://worldclockapi.com:80",
+            "method": "GET",
+            "path": "/api/json/est/now",
+            "body": "",
+            "status": 200,
+            "response": [
+                "1f8b0800000000000400edbd07601c499625262f6dca7b7f4af54ad7e074a10880601324d8904010ecc188cde692ec1d69472329ab2a81ca6556655d661640cced9dbcf7de7befbdf7de7befbdf7ba3b9d4e27f7dfff3f5c6664016cf6ce4adac99e2180aac81f3f7e7c1f3f227ef147bf5b31fbe8d147bb1f8d3e9aaeeb3a5fb64fb3367f532c72fa746f676f777be7def6defd37bb0f1eed7cbabdb3ff6867879aaedbe997e7e74dde5223f990fe479f17cdd3ecfa7971316f5f6797c5f2a211406dbdce471fcdb2eb2fcfdfccf3efe6f95b7aefcd7c5d37f419bdd652ab9faa96f98b0cad3f3acd9a36af97e9eb365bceb27a9632148be0b3a2540477efed7dbabbfbe9fdfb073bfbfb0feeef1dec8e3eaaea59b1cc4a8c8240f1080ef6e9e526af2f8b69fe2a6f56d5b2a1ef96ebb2fc25ff0f441c003500010000"
+            ],
+            "rawHeaders": [
+                "Cache-Control",
+                "no-cache",
+                "Pragma",
+                "no-cache",
+                "Content-Length",
+                "317",
+                "Content-Type",
+                "application/json; charset=utf-8",
+                "Content-Encoding",
+                "gzip",
+                "Expires",
+                "-1",
+                "Vary",
+                "Accept-Encoding",
+                "Server",
+                "Microsoft-IIS/10.0",
+                "X-AspNet-Version",
+                "4.0.30319",
+                "X-Powered-By",
+                "ASP.NET",
+                "Set-Cookie",
+                "ARRAffinity=5bfcb6977b1483ca163226cd3e571f990eb13447599cbcf2fbe0cf7b459489cc;Path=/;HttpOnly;Domain=worldclockapi.com",
+                "Date",
+                "Thu, 25 Mar 2021 21:06:20 GMT",
                 "Connection",
                 "close"
             ],
@@ -227,7 +268,7 @@
             "body": "",
             "status": 200,
             "response": [
-                "1f8b0800000000000400edbd07601c499625262f6dca7b7f4af54ad7e074a10880601324d8904010ecc188cde692ec1d69472329ab2a81ca6556655d661640cced9dbcf7de7befbdf7de7befbdf7ba3b9d4e27f7dfff3f5c6664016cf6ce4adac99e2180aac81f3f7e7c1f3f227ef147bf5b31fbe8d147bb1f8d3e9aaeeb3a5fb64fb3367f532c72fa746f676f777be7def6defd37bb9f3edaff747b67ffd1ce0e355db7d32fcfcf9bbca546f221fd8f3e2f9aa7d9f5f3e262debece2e8be5452380da7a9d8f3e9a65d75f9ebf99e7dfcdf3b7f4de9bf9ba6ee8337aada5563f552df317195a7f749a356d5e2fd3d76db69c65f52c652816c16745a908eededbfb7477f7d3fdfddd070f0e1e3edcb9f770f45155cf8a65566214048a4770b04f2f37797d594cf35779b3aa960d7db75c97e52ff97f007304140500010000"
+                "1f8b0800000000000400edbd07601c499625262f6dca7b7f4af54ad7e074a10880601324d8904010ecc188cde692ec1d69472329ab2a81ca6556655d661640cced9dbcf7de7befbdf7de7befbdf7ba3b9d4e27f7dfff3f5c6664016cf6ce4adac99e2180aac81f3f7e7c1f3f227ef147bf5b31fbe8d147bb1f8d3e9aaeeb3a5fb64fb3367f532c72fa746f676f777be7def6defd37bb0f1eed1c6cefec3fdad9a1a6eb76fae5f97993b7d4483ea4ffd1e745f334bb7e5e5cccdbd7d965b1bc6804505baff3d147b3ecfacbf337f3fcbb79fe96de7b335fd70d7d46afb5d4eaa7aa65fe2243eb8f4eb3a6cdeb65fabacd96b3ac9ea50cc522f8ac2815c1dd7b7b9feeee7e7affc1dea79feeecdfbbf7f0d3d147553d2b9659895110281ec1c13ebddce4f56531cd5fe5cdaa5a36f4dd725d96bfe4ff01580ded7400010000"
             ],
             "rawHeaders": [
                 "Cache-Control",
@@ -253,7 +294,7 @@
                 "Set-Cookie",
                 "ARRAffinity=5bfcb6977b1483ca163226cd3e571f990eb13447599cbcf2fbe0cf7b459489cc;Path=/;HttpOnly;Domain=worldclockapi.com",
                 "Date",
-                "Thu, 25 Mar 2021 20:46:57 GMT",
+                "Thu, 25 Mar 2021 21:08:45 GMT",
                 "Connection",
                 "close"
             ],
