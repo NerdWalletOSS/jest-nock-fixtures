@@ -5,6 +5,8 @@ const mkdirp = require('mkdirp'); // eslint-disable-line import/no-extraneous-de
 const nock = require('nock'); // eslint-disable-line import/no-extraneous-dependencies
 const stableHash = require('./stableHash');
 
+const { pendingMocks, activeMocks } = nock;
+
 // TODO:  there is a ./mode file now.  use that.
 const MODES = {
   DRYRUN: 'dryrun',
@@ -15,6 +17,10 @@ const MODES = {
 
 // https://github.com/nock/nock#events
 const NOCK_NO_MATCH_EVENT = 'no match';
+
+// TODO, will this lint?
+// TODO: expect comes from global
+const getCurrentTestName = () => expect.getState().currentTestName;
 
 function createNockFixturesTestWrapper(options = {}) {
   const {
@@ -56,7 +62,10 @@ function createNockFixturesTestWrapper(options = {}) {
   // is used to provide hints that fixtures need to be recorded
   // and to fail the tests in 'lockdown' mode (most useful in CI)
   let unmatched = [];
-  const handleUnmatchedRequest = req => unmatched.push(req);
+  const handleUnmatchedRequest = req => {
+    console.warn('HANDLE UNMATCHED');
+    unmatched.push(req);
+  }
 
   // // https://github.com/nock/nock/issues/2057#issuecomment-666494539
   // beforeEach(() => nock.cleanAll()) // Removes mocks between unit tests so they run in isolation
@@ -84,9 +93,32 @@ function createNockFixturesTestWrapper(options = {}) {
       nock.activate();
       // nock.enableNetConnect();
     }
+
+    // // track requests that were not mocked
+    // nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
   });
 
   beforeEach(() => {
+    console.log('getCurrentTestName()',
+      {
+        getCurrentTestName: getCurrentTestName(),
+        'expect.getState()': expect.getState(),
+        'snapshotState': expect.getState().snapshotState,
+      },
+    );
+    console.log('be pre restore', {
+      pendingMocks: pendingMocks(),
+      activeMocks: activeMocks(),
+    })
+    nock.restore();
+    console.log('be AFTER restore', {
+      pendingMocks: pendingMocks(),
+      activeMocks: activeMocks(),
+    })
+    if (!nock.isActive()) {
+      nock.activate();
+      // nock.enableNetConnect();
+    }
 
     nock.enableNetConnect();
 
@@ -101,7 +133,7 @@ function createNockFixturesTestWrapper(options = {}) {
         console.log('calling nock.define');
         // load and define mocks from previously recorded fixtures
         const recordings = nock.loadDefs(fixtureFilepath());
-        console.log('recordings', recordings);
+        console.log('recordings', recordings.length);
         nock.define(recordings);
         console.warn( // eslint-disable-line no-console,prettier/prettier
           `${logNamePrefix}: ${mode}: Defined (${
@@ -111,6 +143,7 @@ function createNockFixturesTestWrapper(options = {}) {
       }
 
       // track requests that were not mocked
+      nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
       nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
 
       if (isLockdownMode()) {
@@ -123,9 +156,10 @@ function createNockFixturesTestWrapper(options = {}) {
     }
   });
 
-  afterEach(() => {
-    // Avoid memory-leaks: https://github.com/nock/nock/issues/2057#issuecomment-666494539
-    nock.restore();
+  // afterEach(() => {
+  afterAll(() => {
+      // // Avoid memory-leaks: https://github.com/nock/nock/issues/2057#issuecomment-666494539
+    // nock.restore();
 
     if (isRecordingMode()) {
       let recording = nock.recorder.play();
@@ -136,7 +170,7 @@ function createNockFixturesTestWrapper(options = {}) {
         // ensure fixtures folder exists
         mkdirp.sync(fixtureDir());
         // sort it
-        recording = sortBy(recording, ['status', 'scope', 'method', 'path', 'body']); // eslint-disable-line prettier/prettier
+        // recording = sortBy(recording, ['status', 'scope', 'method', 'path', 'body']); // eslint-disable-line prettier/prettier
         // write it
         writeFileSync(fixtureFilepath(), JSON.stringify(recording, null, 4));
         // message what happened
@@ -162,19 +196,20 @@ function createNockFixturesTestWrapper(options = {}) {
         }
       }
     }
-  });
+  // });
 
-  afterAll(() => {
+  // afterAll(() => {
     const cachedUnmatched = unmatched;
 
     // TODO: added this
-    // nock.restore(); // Avoids memory-leaks
+    // Avoid memory-leaks: https://github.com/nock/nock/issues/2057#issuecomment-666494539
+    nock.restore();
     // full cleanup
     nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
     unmatched = [];
     nock.cleanAll();
     nock.enableNetConnect();
-    console.log('unmatched', unmatched);
+    // console.log('cachedUnmatched', cachedUnmatched);
     // report about unmatched requests
     if (cachedUnmatched.length) {
       // console.log('found unmatched.  here they are hashed',
