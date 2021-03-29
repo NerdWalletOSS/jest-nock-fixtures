@@ -7,7 +7,7 @@ const BASE_CONFIG = {
   // An array of file extensions your modules use
   moduleFileExtensions: ['jsx', 'js', 'json', 'node'],
   modulePathIgnorePatterns: ['<rootDir>/build', 'npm-cache', '.npm'],
-  setupFilesAfterEnv: ['<rootDir>/config/setupTestFrameworkScriptFile.js'],
+  // setupFilesAfterEnv: ['<rootDir>/config/setupTestFrameworkScriptFile.js'],
   // // ignore the folder where the fixtures are saved so they don't endlessly trigger re-runs in record mode
   // watchPathIgnorePatterns: ['__nocks__'],
   // Indicates whether each individual test should be reported during the run
@@ -21,12 +21,15 @@ module.exports = {
 
   projects: [
     {
+      // apply preset in each project that needs it, .... or merge it
+      preset: '<rootDir>',
       ...BASE_CONFIG,
       displayName: 'web',
       // The test environment that will be used for testing
       testEnvironment: 'jsdom',
     },
     // {
+    //   preset: '<rootDir>',
     //   ...BASE_CONFIG,
     //   displayName: 'other',
     //   // store snapshots in `__snapshots__other__` instead of `__snapshots__`

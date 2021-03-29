@@ -8,9 +8,12 @@ const TEST_URL = 'http://worldclockapi.com/api/json/utc/now';
 
 describe('implementation', () => {
   it('should not allow external requests in CI', async () => {
-    const res = await fetch(TEST_URL);
+    // const res = await fetch(TEST_URL);
+    let res = await fetch(TEST_URL);
     const json = await res.json();
     expect(json).toMatchSnapshot();
+    res = await fetch('https://jsonplaceholder.typicode.com/todos/1');
+    await res.json();
   });
 
   it('Hi here is another', async () => {
@@ -49,6 +52,6 @@ describe('implementation', () => {
     // // https://jsonplaceholder.typicode.com/todos/1
     // const json = await res.json();
     // expect(json).toMatchSnapshot();
-
+    expect(2).toBe(2);
   });
 });

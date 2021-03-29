@@ -3,11 +3,11 @@
 exports[`implementation AND YET here is another 1`] = `
 Object {
   "$id": "1",
-  "currentDateTime": "2021-03-25T17:08-04:00",
-  "currentFileTime": 132611657263230880,
-  "dayOfTheWeek": "Thursday",
+  "currentDateTime": "2021-03-29T18:36-04:00",
+  "currentFileTime": 132615165702707020,
+  "dayOfTheWeek": "Monday",
   "isDayLightSavingsTime": true,
-  "ordinalDate": "2021-84",
+  "ordinalDate": "2021-88",
   "serviceResponse": null,
   "timeZoneName": "Eastern Standard Time",
   "utcOffset": "-04:00:00",
@@ -17,11 +17,11 @@ Object {
 exports[`implementation AND YET here is another 2`] = `
 Object {
   "$id": "1",
-  "currentDateTime": "2021-03-25T17:08-04:00",
-  "currentFileTime": 132611657266043400,
-  "dayOfTheWeek": "Thursday",
+  "currentDateTime": "2021-03-29T18:36-04:00",
+  "currentFileTime": 132615165705363140,
+  "dayOfTheWeek": "Monday",
   "isDayLightSavingsTime": true,
-  "ordinalDate": "2021-84",
+  "ordinalDate": "2021-88",
   "serviceResponse": null,
   "timeZoneName": "Eastern Standard Time",
   "utcOffset": "-04:00:00",
@@ -46,28 +46,14 @@ Object {
 }
 `;
 
-exports[`implementation has no requests 1`] = `
-Object {
-  "$id": "1",
-  "currentDateTime": "2021-03-25T17:04-04:00",
-  "currentFileTime": 132611654710789150,
-  "dayOfTheWeek": "Thursday",
-  "isDayLightSavingsTime": true,
-  "ordinalDate": "2021-84",
-  "serviceResponse": null,
-  "timeZoneName": "Eastern Standard Time",
-  "utcOffset": "-04:00:00",
-}
-`;
-
 exports[`implementation should not allow external requests in CI 1`] = `
 Object {
   "$id": "1",
-  "currentDateTime": "2021-03-25T20:55Z",
-  "currentFileTime": 132611793162434050,
-  "dayOfTheWeek": "Thursday",
+  "currentDateTime": "2021-03-29T22:36Z",
+  "currentFileTime": 132615309695363040,
+  "dayOfTheWeek": "Monday",
   "isDayLightSavingsTime": false,
-  "ordinalDate": "2021-84",
+  "ordinalDate": "2021-88",
   "serviceResponse": null,
   "timeZoneName": "UTC",
   "utcOffset": "00:00:00",

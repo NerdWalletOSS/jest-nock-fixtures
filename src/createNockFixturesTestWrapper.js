@@ -4,9 +4,13 @@ const { sortBy } = require('lodash');
 const mkdirp = require('mkdirp'); // eslint-disable-line import/no-extraneous-dependencies
 const nock = require('nock'); // eslint-disable-line import/no-extraneous-dependencies
 const stableHash = require('./stableHash');
-const { yellow, red } = require("chalk");
+const chalk = require("chalk");
+
+const { yellow, red } = chalk;
 
 const { pendingMocks, activeMocks } = nock;
+
+const SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT = Symbol('jest-nock-fixtures-result');
 
 // TODO:  there is a ./mode file now.  use that.
 const MODES = {
@@ -21,7 +25,9 @@ const NOCK_NO_MATCH_EVENT = 'no match';
 
 // TODO, will this lint?
 // TODO: expect comes from global
+// TODO: reuse getJestGlobalState from jest-nock-fixtures file
 const getCurrentTestName = () => expect.getState().currentTestName;
+
 
 function createNockFixturesTestWrapper(options = {}) {
   const {
@@ -64,7 +70,7 @@ function createNockFixturesTestWrapper(options = {}) {
   // and to fail the tests in 'lockdown' mode (most useful in CI)
   let unmatched = [];
   const handleUnmatchedRequest = req => {
-    console.log(yellow('HANDLE UNMATCHED'));
+    console.log(yellow.bold('HANDLE UNMATCHED'));
     unmatched.push(req);
   }
 
@@ -86,6 +92,44 @@ function createNockFixturesTestWrapper(options = {}) {
   //     // nock.enableNetConnect();
   // });
 
+  // const originalConsoleLog = console.log;
+  // console.log = console.warn = console.error = () => {};
+
+
+  // let uniqueTestName;
+  // TODO: better comment
+  const uniqueTestNameCounters = new Map();
+  const captured = {};
+
+  let currentResult;
+
+  global.jasmine.getEnv().addReporter({
+    jasmineStarted: (...args) => {
+      console.log('jasmineStarted', args);
+    },
+    specStarted: result => {
+      console.log('specStarted', result)
+
+      // TODO: comment about the setting of a uniqueTestName (names can be duplicated)
+      // const testName = getCurrentTestName();
+      const testName = result.fullName;
+      const ct = (uniqueTestNameCounters.get(testName) || 0) + 1;
+      // uniqueTestName = `${testName} ${ct}`;
+      const uniqueTestName = `${testName} ${ct}`;
+      uniqueTestNameCounters.set(testName, ct);  
+      // store the uniqueTestName on the jasmine result object
+      result[SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT] = {
+        uniqueTestName,
+      };
+
+      currentResult = result;
+      // TODO: namespace this
+    },
+    specDone: result => {
+      console.log('specDone', result);
+      // Determine if test should be cleaned up
+    },
+  });
 
   // beforeEach(() => {
   //   nock.cleanAll();
@@ -108,12 +152,9 @@ function createNockFixturesTestWrapper(options = {}) {
 
     // // track requests that were not mocked
     // nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-  });
+    console.log('global.jasming', global.jasmine.getEnv(), global.jasmine.getEnv().pending)
 
-  let uniqueTestName;
-  // TODO: better comment
-  const uniqueTestNameCounters = new Map();
-  const captured = {};
+  });
 
   beforeEach(() => {
     // console.log('getCurrentTestName()',
@@ -123,11 +164,13 @@ function createNockFixturesTestWrapper(options = {}) {
     //     'snapshotState': expect.getState().snapshotState,
     //   },
     // );
+    console.log('CURRENT RESULT BE', currentResult);
+    // const testName = getCurrentTestName();
+    // const ct = (uniqueTestNameCounters.get(testName) || 0) + 1;
+    // uniqueTestName = `${testName} ${ct}`;
+    // uniqueTestNameCounters.set(testName, ct);
 
-    const testName = getCurrentTestName();
-    const ct = (uniqueTestNameCounters.get(testName) || 0) + 1;
-    uniqueTestName = `${testName} ${ct}`;
-    uniqueTestNameCounters.set(testName, ct);
+    const { uniqueTestName } = currentResult[SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT];
 
     // console.log('uniqueTestNameCounters', {
     //   uniqueTestName,
@@ -148,19 +191,19 @@ function createNockFixturesTestWrapper(options = {}) {
       // nock.enableNetConnect();
     }
 
+    // explicitly enableNetConnect for dry-run
     nock.enableNetConnect();
-
-    // TODO: what happens if i always record?
-    nock.recorder.rec({
-      dont_print: true,
-      output_objects: true,
-    });
+    // nock.enableNetConnect((...args) => {
+    //   console.log(chalk.cyan('uhhhhhhhhhhh'), ...args)
+    // });
 
     if (isRecordingMode()) {
-      // nock.recorder.rec({
-      //   dont_print: true,
-      //   output_objects: true,
-      // });
+      nock.recorder.rec({
+        dont_print: true,
+        // dont_print: false,
+        // logging: (...args) => console.log(chalk.cyan(...args)),
+        output_objects: true,
+      });  
     } else {
       console.log('fixtureFilepath()', fixtureFilepath())
       if (!isWildMode() && existsSync(fixtureFilepath())) {
@@ -192,28 +235,30 @@ function createNockFixturesTestWrapper(options = {}) {
         console.log(yellow("LOCKDOWN MODE"));
         nock.disableNetConnect();
       } else {
-        nock.enableNetConnect();
+        // nock.enableNetConnect();
         console.log(yellow('NOT LOCKDOWN MODE'))
       }
     }
   });
 
   afterEach(() => {
+    const { uniqueTestName } = currentResult[SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT];
+
     console.log('afterEach', {
       uniqueTestName,
+      currentResult,
     })
   // });
   // afterAll(() => {
       // // Avoid memory-leaks: https://github.com/nock/nock/issues/2057#issuecomment-666494539
     // nock.restore();
 
-    let recordings = nock.recorder.play();
-    console.log(yellow('recording.length', recordings.length));
-    nock.recorder.clear();
 
     if (isRecordingMode()) {
-      // let recordings = nock.recorder.play();
-      // nock.recorder.clear();
+      let recordings = nock.recorder.play();
+      console.log(yellow('recordings.length', recordings.length));
+      console.log('recordings', recordings);
+      nock.recorder.clear();
       // // nock.restore();
 
       if (recordings.length > 0) {
@@ -256,6 +301,7 @@ function createNockFixturesTestWrapper(options = {}) {
   });
 
   afterAll(() => {
+    const { uniqueTestName } = currentResult[SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT];
     const cachedUnmatched = unmatched;
 
     // TODO: added this
@@ -344,6 +390,8 @@ function createNockFixturesTestWrapper(options = {}) {
         );
       }
     }
+
+    console.log('global.jasming', global.jasmine.getEnv())
   });
 }
 

@@ -43,6 +43,11 @@ function getModeBanner({
 
 
 class JestNockFixturesWatchPlugin {
+  run(globalConfig, updateConfigAndRun) {
+    // do something.
+    console.log('WATCHPLUGIN RUN', globalConfig);
+  }
+
   changeMode() {
     // console.log('changeMode', getMode);
     switch (getMode()) {
