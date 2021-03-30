@@ -310,12 +310,6 @@ function createNockFixturesTestWrapper(options = {}) {
     },
   };
 
-  beforeAll(() => {
-    if (!nock.isActive()) {
-      nock.activate();
-    }
-  });
-
   beforeEach(() => {
 
     // Remove mocks between unit tests so they run in isolation
