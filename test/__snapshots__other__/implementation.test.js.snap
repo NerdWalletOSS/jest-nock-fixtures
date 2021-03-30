@@ -1,13 +1,59 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`implementation AND YET here is another 1`] = `
+Object {
+  "$id": "1",
+  "currentDateTime": "2021-03-30T17:48-04:00",
+  "currentFileTime": 132616001219418300,
+  "dayOfTheWeek": "Tuesday",
+  "isDayLightSavingsTime": true,
+  "ordinalDate": "2021-89",
+  "serviceResponse": null,
+  "timeZoneName": "Eastern Standard Time",
+  "utcOffset": "-04:00:00",
+}
+`;
+
+exports[`implementation AND YET here is another 2`] = `
+Object {
+  "$id": "1",
+  "currentDateTime": "2021-03-30T17:48-04:00",
+  "currentFileTime": 132616001223168210,
+  "dayOfTheWeek": "Tuesday",
+  "isDayLightSavingsTime": true,
+  "ordinalDate": "2021-89",
+  "serviceResponse": null,
+  "timeZoneName": "Eastern Standard Time",
+  "utcOffset": "-04:00:00",
+}
+`;
+
+exports[`implementation AND here is another 1`] = `
+Object {
+  "completed": false,
+  "id": 1,
+  "title": "delectus aut autem",
+  "userId": 1,
+}
+`;
+
+exports[`implementation Hi here is another 1`] = `
+Object {
+  "completed": false,
+  "id": 1,
+  "title": "delectus aut autem",
+  "userId": 1,
+}
+`;
+
 exports[`implementation should not allow external requests in CI 1`] = `
 Object {
   "$id": "1",
-  "currentDateTime": "2019-06-26T00:28Z",
-  "currentFileTime": 132059825128361950,
-  "dayOfTheWeek": "Wednesday",
+  "currentDateTime": "2021-03-30T21:48Z",
+  "currentFileTime": 132616145210668220,
+  "dayOfTheWeek": "Tuesday",
   "isDayLightSavingsTime": false,
-  "ordinalDate": "2019-177",
+  "ordinalDate": "2021-89",
   "serviceResponse": null,
   "timeZoneName": "UTC",
   "utcOffset": "00:00:00",

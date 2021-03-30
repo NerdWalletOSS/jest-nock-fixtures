@@ -17,6 +17,7 @@ const BASE_CONFIG = {
 
 module.exports = {
   // apply the preset
+  // TODO: preset is only the watch plugin.  only apply it here in example.
   preset: '<rootDir>',
 
   projects: [
@@ -28,14 +29,14 @@ module.exports = {
       // The test environment that will be used for testing
       testEnvironment: 'jsdom',
     },
-    // {
-    //   preset: '<rootDir>',
-    //   ...BASE_CONFIG,
-    //   displayName: 'other',
-    //   // store snapshots in `__snapshots__other__` instead of `__snapshots__`
-    //   snapshotResolver: '<rootDir>/config/snapshotResolver-other.js',
-    //   // The test environment that will be used for testing
-    //   testEnvironment: 'node',
-    // },
+    {
+      preset: '<rootDir>',
+      ...BASE_CONFIG,
+      displayName: 'other',
+      // store snapshots in `__snapshots__other__` instead of `__snapshots__`
+      snapshotResolver: '<rootDir>/config/snapshotResolver-other.js',
+      // The test environment that will be used for testing
+      testEnvironment: 'node',
+    },
   ],
 };
