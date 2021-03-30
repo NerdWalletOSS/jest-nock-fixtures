@@ -3,11 +3,11 @@
 exports[`implementation AND YET here is another 1`] = `
 Object {
   "$id": "1",
-  "currentDateTime": "2021-03-29T21:00-04:00",
-  "currentFileTime": 132615252459593340,
-  "dayOfTheWeek": "Monday",
+  "currentDateTime": "2021-03-30T14:05-04:00",
+  "currentFileTime": 132615867281669490,
+  "dayOfTheWeek": "Tuesday",
   "isDayLightSavingsTime": true,
-  "ordinalDate": "2021-88",
+  "ordinalDate": "2021-89",
   "serviceResponse": null,
   "timeZoneName": "Eastern Standard Time",
   "utcOffset": "-04:00:00",
@@ -17,11 +17,11 @@ Object {
 exports[`implementation AND YET here is another 2`] = `
 Object {
   "$id": "1",
-  "currentDateTime": "2021-03-29T21:00-04:00",
-  "currentFileTime": 132615252461759940,
-  "dayOfTheWeek": "Monday",
+  "currentDateTime": "2021-03-30T14:05-04:00",
+  "currentFileTime": 132615867284169520,
+  "dayOfTheWeek": "Tuesday",
   "isDayLightSavingsTime": true,
-  "ordinalDate": "2021-88",
+  "ordinalDate": "2021-89",
   "serviceResponse": null,
   "timeZoneName": "Eastern Standard Time",
   "utcOffset": "-04:00:00",
@@ -49,8 +49,8 @@ Object {
 exports[`implementation should not allow external requests in CI 1`] = `
 Object {
   "$id": "1",
-  "currentDateTime": "2021-03-30T01:00Z",
-  "currentFileTime": 132615396453322510,
+  "currentDateTime": "2021-03-30T18:05Z",
+  "currentFileTime": 132616011274996350,
   "dayOfTheWeek": "Tuesday",
   "isDayLightSavingsTime": false,
   "ordinalDate": "2021-89",
