@@ -7,11 +7,15 @@ const BASE_CONFIG = {
   // An array of file extensions your modules use
   moduleFileExtensions: ['jsx', 'js', 'json', 'node'],
   modulePathIgnorePatterns: ['<rootDir>/build', 'npm-cache', '.npm'],
-  // setupFilesAfterEnv: ['<rootDir>/config/setupTestFrameworkScriptFile.js'],
-  // // ignore the folder where the fixtures are saved so they don't endlessly trigger re-runs in record mode
-  // watchPathIgnorePatterns: ['__nocks__'],
+  setupFilesAfterEnv: ['<rootDir>/config/setupTestFrameworkScriptFile.js'],
+  // ignore the folder where the fixtures are saved so they don't endlessly trigger re-runs in record mode
+  watchPathIgnorePatterns: ['__nocks__'],
   // Indicates whether each individual test should be reported during the run
   // verbose: true,
+  // setupFilesAfterEnv: [require.resolve('./src/SetupAfterEnv')],
+  // // ignore the folder where the fixtures are saved so they don't endlessly trigger re-runs in record mode
+  // watchPathIgnorePatterns: ['__nocks__'],
+
   verbose: false,
 };
 
