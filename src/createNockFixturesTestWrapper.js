@@ -42,6 +42,10 @@ function createNockFixturesTestWrapper(options = {}) {
       }). Looking for fixtures at ${fixtureFilepath}. Record fixtures and try again.`,
   } = options;
 
+  if (mode === WILD) {
+    return;
+  }
+
   const {
     beforeEach,
     afterEach,
@@ -49,11 +53,6 @@ function createNockFixturesTestWrapper(options = {}) {
     afterAll,
     addReporter,
   } = jasmine.getEnv();
-
-  const isRecordingMode = () => mode === MODES.RECORD;
-  const isLockdownMode = () => mode === MODES.LOCKDOWN;
-  const isDryrunMode = () => mode === MODES.DRYRUN;
-  const isWildMode = () => mode === MODES.WILD;
 
   // keeping track of unmatched requests when not recording
   // is used to provide hints that fixtures need to be recorded
@@ -118,6 +117,7 @@ function createNockFixturesTestWrapper(options = {}) {
   // utility for logging user messages
   const print = (str) => console.log(message(str));
 
+
   const allTests = [];
 
   addReporter({
@@ -145,8 +145,8 @@ function createNockFixturesTestWrapper(options = {}) {
 
       // track requests that were not mocked
       unmatched = [];
-      // nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-      // nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+      nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+      nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
 
       // TODO: namespace this
     },
@@ -170,9 +170,9 @@ function createNockFixturesTestWrapper(options = {}) {
         const recordings = fixture[uniqueTestName()] || [];
         nock.define(recordings);
         print(yellow(`Defined (${recordings.length}) request mocks for '${uniqueTestName()}'`));  
-        // track requests that were not mocked
-        nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-        nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+        // // track requests that were not mocked
+        // nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+        // nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
       },
       finish() {
         // report about unmatched requests
@@ -195,9 +195,9 @@ function createNockFixturesTestWrapper(options = {}) {
         const recordings = fixture[uniqueTestName()] || [];
         nock.define(recordings);
         print(yellow(`Defined (${recordings.length}) request mocks for '${uniqueTestName()}'`));
-        // track requests that were not mocked
-        nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-        nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+        // // track requests that were not mocked
+        // nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+        // nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
       },
       finish() {
         // error on unmatched requests
@@ -308,11 +308,6 @@ function createNockFixturesTestWrapper(options = {}) {
         }
       },
     },
-    [WILD]: {
-      apply() {},
-      finish() {},
-      cleanup() {},
-    },
   };
 
   beforeAll(() => {
@@ -333,6 +328,11 @@ function createNockFixturesTestWrapper(options = {}) {
       nock.activate();
     }
 
+        // // track requests that were not mocked
+        // nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+        // nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+
+    
     lifecycles[mode].apply();
 
   });
