@@ -150,46 +150,6 @@ function createNockFixturesTestWrapper(options = {}) {
     specDone: result => {
       console.log('specDone', result);
 
-      if (isRecordingMode()) {
-        // TODO: nock operations should be in jasmine before/after(each/all) functions
-        let recordings = nock.recorder.play();
-        console.log(yellow('recordings.length', recordings.length));
-        console.log('recordings', recordings);
-        nock.recorder.clear();
-        // // nock.restore();
-  
-        if (recordings.length > 0) {
-          captured[uniqueTestName()] = recordings;
-          // message what happened
-          print(
-            yellow(
-              `${mode}: Recorded requests: ${recordings.length}`
-            )
-          );
-        } else if (fixture.hasOwnProperty(uniqueTestName)) {
-          console.log(red('TODO: cleanup fixtures.hasOwnProperty(uniqueTestName)', uniqueTestName));
-          delete fixture[uniqueTestName()];
-        }
-        // } else if (existsSync(fixtureFilepath())) {
-        //   // // cleanup obsolete nock fixture file and dir if they exist
-        //   // console.warn( // eslint-disable-line no-console,prettier/prettier
-        //   //   `${logNamePrefix}: ${mode}: Nothing recorded, cleaning up ${fixtureFilepath()}.`
-        //   // );
-        //   // // remove the fixture file
-        //   // unlinkSync(fixtureFilepath());
-        //   // // remove the directory if not empty
-        //   // try {
-        //   //   rmdirSync(fixtureDir());
-        //   //   // message what happened
-        //   //   console.warn( // eslint-disable-line no-console,prettier/prettier
-        //   //     `${logNamePrefix}: ${mode}: Cleaned up ${fixtureDir()} because no fixtures were left.`
-        //   //   );
-        //   // } catch (err) {
-        //   //   if (err.code !== 'ENOTEMPTY') throw err;
-        //   // }
-        // }
-  
-      }
     },
     jasmineDone: (...args) => {
       console.log('JASMINE DONE', ...args);
@@ -219,10 +179,8 @@ function createNockFixturesTestWrapper(options = {}) {
         print(yellow(`Removed obsolete fixture entry for ${name}`));
       });
 
-      print(red('TODO:  SORT THE FIXTURE BY THE ORDER RECORDED IN allTests'));
-
       if (Object.keys(captured).length) {
-        console.log(yellow('WRITING'));
+        // console.log(yellow('WRITING'));
         // ensure fixtures folder exists
         mkdirp.sync(fixtureDir());
         // sort it
@@ -299,7 +257,7 @@ function createNockFixturesTestWrapper(options = {}) {
   });
 
   beforeEach(() => {
-    console.log('CURRENT RESULT BE', currentResult);
+    // console.log('CURRENT RESULT BE', currentResult);
     const { uniqueTestName } = currentResult[SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT];
 
     unmatched = [];
@@ -353,7 +311,30 @@ function createNockFixturesTestWrapper(options = {}) {
     }
   });
 
+  // TODO: cleanup this block
   afterEach(() => {
+    if (isRecordingMode()) {
+      // TODO: nock operations should be in jasmine before/after(each/all) functions
+      let recordings = nock.recorder.play();
+      console.log(yellow('recordings.length', recordings.length));
+      // console.log('recordings', recordings);
+      nock.recorder.clear();
+      // // nock.restore();
+
+      if (recordings.length > 0) {
+        captured[uniqueTestName()] = recordings;
+        // message what happened
+        print(
+          yellow(
+            `${mode}: Recorded requests: ${recordings.length}`
+          )
+        );
+      } else if (fixture.hasOwnProperty(uniqueTestName())) {
+        // console.log(red('TODO: cleanup fixtures.hasOwnProperty(uniqueTestName)', uniqueTestName));
+        delete fixture[uniqueTestName()];
+      }
+    }
+
     const cachedUnmatched = unmatched;
     // console.log('cachedUnmatched', cachedUnmatched);
     // report about unmatched requests
@@ -389,11 +370,11 @@ function createNockFixturesTestWrapper(options = {}) {
     nock.cleanAll();
     nock.enableNetConnect();
 
-    console.log('after all', {
-      captured
-    });
+    // console.log('after all', {
+    //   captured
+    // });
 
-    console.log('global.jasming', global.jasmine.getEnv())
+    // console.log('global.jasming', global.jasmine.getEnv())
   });
 }
 
