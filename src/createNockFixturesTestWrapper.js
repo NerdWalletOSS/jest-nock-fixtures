@@ -163,25 +163,16 @@ function createNockFixturesTestWrapper(options = {}) {
   const lifecycles = {
     [DRYRUN]: {
       apply() {
-        nock.restore();
-
-        if (!nock.isActive()) {
-          nock.activate();
-        }
-
         // explicitly enableNetConnect for dry-run
         nock.enableNetConnect();
 
         // define mocks from previously recorded fixture
         const recordings = fixture[uniqueTestName()] || [];
-        console.log('dryrun recordings', uniqueTestName(), recordings.length);
         nock.define(recordings);
         print(yellow(`Defined (${recordings.length}) request mocks for '${uniqueTestName()}'`));  
         // track requests that were not mocked
         nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
         nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-        nock.enableNetConnect();
-
       },
       finish() {
         // report about unmatched requests
@@ -197,12 +188,7 @@ function createNockFixturesTestWrapper(options = {}) {
     },
     [LOCKDOWN]: {
       apply() {
-        nock.restore();
-
-        if (!nock.isActive()) {
-          nock.activate();
-        }
-
+        // http requests are NOT ALLOWED in 'lockdown' mode
         nock.disableNetConnect();
 
         // define mocks from previously recorded fixture
