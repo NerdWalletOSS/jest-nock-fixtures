@@ -1,6 +1,6 @@
 const { dirname, basename, join } = require('path');
 const { existsSync, readFileSync, writeFileSync, unlinkSync, rmdirSync } = require('fs');
-const { sortBy } = require('lodash');
+const { sortBy, without } = require('lodash');
 const mkdirp = require('mkdirp'); // eslint-disable-line import/no-extraneous-dependencies
 const nock = require('nock'); // eslint-disable-line import/no-extraneous-dependencies
 const stableHash = require('./stableHash');
@@ -104,8 +104,10 @@ function createNockFixturesTestWrapper(options = {}) {
   const fixtureFilename = () => `${basename(getTestPath())}.json`;
   const fixtureFilepath = () => join(fixtureDir(), fixtureFilename());
 
+  // TODO: maybe just store this globally
   const uniqueTestName = () => currentResult?.[SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT].uniqueTestName;
-  // `${logNamePrefix}: ${mode}: '${uniqueTestName}': 
+
+  // utility for creating user messages
   const message = (str) => ([
     [
       chalk.cyan(`${logNamePrefix}`),
@@ -114,8 +116,11 @@ function createNockFixturesTestWrapper(options = {}) {
     ].filter(Boolean).join(': ') + ': ',
     str
   ]).join(' ');
+
+  // utility for logging user messages
   const print = (str) => console.log(message(str));
 
+  const allTests = [];
 
   global.jasmine.getEnv().addReporter({
     jasmineStarted: (...args) => {
@@ -129,7 +134,7 @@ function createNockFixturesTestWrapper(options = {}) {
     // specStarted: result => {
     specStarted: result => {
       console.log('specStarted', result)
-
+      allTests.push(result);
       // TODO: comment about the setting of a uniqueTestName (names can be duplicated)
       const testName = result.fullName;
       const ct = (uniqueTestNameCounters.get(testName) || 0) + 1;
@@ -144,10 +149,9 @@ function createNockFixturesTestWrapper(options = {}) {
     },
     specDone: result => {
       console.log('specDone', result);
-      // Determine if test should be cleaned up
-
 
       if (isRecordingMode()) {
+        // TODO: nock operations should be in jasmine before/after(each/all) functions
         let recordings = nock.recorder.play();
         console.log(yellow('recordings.length', recordings.length));
         console.log('recordings', recordings);
@@ -190,6 +194,33 @@ function createNockFixturesTestWrapper(options = {}) {
     jasmineDone: (...args) => {
       console.log('JASMINE DONE', ...args);
 
+      currentResult = null;
+
+      if (!isRecordingMode()) {
+        return;
+      }
+
+      // Determine if test should be cleaned up
+      const fixturesToRemove = without(
+        Object.keys(fixture),
+        ...allTests.map(
+          (result) => result[SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT].uniqueTestName,
+        )
+      );
+      // console.log({
+      //   fixturesToRemove,
+      //   fixtureKeys: Object.keys(fixture),
+      //   allTests: allTests.map(
+      //     (result) => result[SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT].uniqueTestName,
+      //   )
+      // });
+      fixturesToRemove.forEach(name => {
+        delete fixture[name];
+        print(yellow(`Removed obsolete fixture entry for ${name}`));
+      });
+
+      print(red('TODO:  SORT THE FIXTURE BY THE ORDER RECORDED IN allTests'));
+
       if (Object.keys(captured).length) {
         console.log(yellow('WRITING'));
         // ensure fixtures folder exists
@@ -203,8 +234,18 @@ function createNockFixturesTestWrapper(options = {}) {
         Object.keys(captured).forEach(
           (name) => { fixture[name] = captured[name]; },
         );
+        // sort the fixture entries by the order in which they were encountered
+        const sortedFixture = allTests.reduce(
+          (memo, { [SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT]: { uniqueTestName }}) => {
+            if (fixture[uniqueTestName]) {
+              memo[uniqueTestName] = fixture[uniqueTestName];
+            }
+            return memo;
+          },
+          {}
+        );
         // const fixture = Object.assign({}, existingFixture, captured);
-        writeFileSync(fixtureFilepath(), JSON.stringify(fixture, null, 2));
+        writeFileSync(fixtureFilepath(), JSON.stringify(sortedFixture, null, 2));
         // message what happened
         print( // eslint-disable-line no-console,prettier/prettier
           yellow(
@@ -220,24 +261,27 @@ function createNockFixturesTestWrapper(options = {}) {
       // }
       } else if (existsSync(fixtureFilepath())) {
         // cleanup obsolete nock fixture file and dir if they exist
-        console.log( // eslint-disable-line no-console,prettier/prettier
+        print( // eslint-disable-line no-console,prettier/prettier
           yellow(
-            `${logNamePrefix}: ${mode}: Nothing recorded, cleaning up ${fixtureFilepath()}.`
+            `Nothing recorded, cleaning up ${fixtureFilepath()}.`
           )
         );
         console.log(red('TODO: CLEANUP', uniqueTestName));
-        // // remove the fixture file
-        // unlinkSync(fixtureFilepath());
-        // // remove the directory if not empty
-        // try {
-        //   rmdirSync(fixtureDir());
-        //   // message what happened
-        //   console.warn( // eslint-disable-line no-console,prettier/prettier
-        //     `${logNamePrefix}: ${mode}: Cleaned up ${fixtureDir()} because no fixtures were left.`
-        //   );
-        // } catch (err) {
-        //   if (err.code !== 'ENOTEMPTY') throw err;
-        // }
+        // remove the fixture file
+        unlinkSync(fixtureFilepath());
+        // remove the directory if not empty
+        try {
+          rmdirSync(fixtureDir());
+          // message what happened
+          print( // eslint-disable-line no-console,prettier/prettier
+            yellow(`Cleaned up ${fixtureDir()} because no fixtures were left.`)
+          );
+          // console.warn( // eslint-disable-line no-console,prettier/prettier
+          //   `${logNamePrefix}: ${mode}: Cleaned up ${fixtureDir()} because no fixtures were left.`
+          // );
+        } catch (err) {
+          if (err.code !== 'ENOTEMPTY') throw err;
+        }
       }
   
     }
