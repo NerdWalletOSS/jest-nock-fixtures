@@ -60,7 +60,7 @@ function createNockFixturesTestWrapper(options = {}) {
   // and to fail the tests in 'lockdown' mode (most useful in CI)
   let unmatched = [];
   const handleUnmatchedRequest = req => {
-    console.log(yellow.bold('HANDLE UNMATCHED'));
+    print(yellow.bold('HANDLE UNMATCHED'));
     unmatched.push(req);
   }
 
@@ -84,7 +84,7 @@ function createNockFixturesTestWrapper(options = {}) {
 
   // const originalConsoleLog = console.log;
   // console.log = console.warn = console.error = () => {};
-  console.log('getEnv', jasmine.getEnv());
+  // console.log('getEnv', jasmine.getEnv());
 
   // let uniqueTestName;
   // TODO: better comment
@@ -105,15 +105,16 @@ function createNockFixturesTestWrapper(options = {}) {
   const uniqueTestName = () => currentResult?.[SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT].uniqueTestName;
 
   // utility for creating user messages
-  const message = (str) => ([
-    [
-      chalk.cyan(`${logNamePrefix}`),
-      chalk.yellow(`${mode}`),
-      // uniqueTestName() && chalk.grey(`${uniqueTestName()}`),
-    ].filter(Boolean).join(': ') + ': ',
-    str
-  ]).join(' ');
-
+  const message = (str) => 
+    // `${chalk.cyan(`${logNamePrefix}`)}: ${chalk.yellow(`${mode}`)}: ${str}`;
+    ([
+      [
+        chalk.cyan(`${logNamePrefix}`),
+        chalk.yellow(`${mode}`),
+        uniqueTestName() && chalk.grey(`${uniqueTestName()}`),
+      ].filter(Boolean).join(': ') + ': ',
+      str
+    ]).join(' ');
   // utility for logging user messages
   const print = (str) => console.log(message(str));
 
@@ -129,7 +130,7 @@ function createNockFixturesTestWrapper(options = {}) {
       }
     },
     specStarted: result => {
-      console.log('specStarted', result)
+      // console.log('specStarted', result)
       allTests.push(result);
       // TODO: comment about the setting of a uniqueTestName (names can be duplicated)
       const testName = result.fullName;
@@ -144,21 +145,21 @@ function createNockFixturesTestWrapper(options = {}) {
 
       // track requests that were not mocked
       unmatched = [];
-      nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-      nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+      // nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+      // nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
 
       // TODO: namespace this
     },
     specDone: result => {
-      console.log('specDone', result);
+      // console.log('specDone', result);
 
     },
     jasmineDone: (...args) => {
-      console.log('JASMINE DONE', ...args);
+      // console.log('JASMINE DONE', ...args);
 
       currentResult = null;
-
       lifecycles[mode].cleanup();
+
       // if (!isRecordingMode()) {
       //   return;
       // }
@@ -238,16 +239,25 @@ function createNockFixturesTestWrapper(options = {}) {
   const lifecycles = {
     [DRYRUN]: {
       apply() {
+        nock.restore();
+
+        if (!nock.isActive()) {
+          nock.activate();
+        }
+
         // explicitly enableNetConnect for dry-run
         nock.enableNetConnect();
 
         // define mocks from previously recorded fixture
         const recordings = fixture[uniqueTestName()] || [];
+        console.log('dryrun recordings', uniqueTestName(), recordings.length);
         nock.define(recordings);
         print(yellow(`Defined (${recordings.length}) request mocks for '${uniqueTestName()}'`));  
-        // // track requests that were not mocked
-        // nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-        // nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+        // track requests that were not mocked
+        nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+        nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+        nock.enableNetConnect();
+
       },
       finish() {
         // report about unmatched requests
@@ -275,9 +285,9 @@ function createNockFixturesTestWrapper(options = {}) {
         const recordings = fixture[uniqueTestName()] || [];
         nock.define(recordings);
         print(yellow(`Defined (${recordings.length}) request mocks for '${uniqueTestName()}'`));
-        // // track requests that were not mocked
-        // nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-        // nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+        // track requests that were not mocked
+        nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+        nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
       },
       finish() {
         // error on unmatched requests

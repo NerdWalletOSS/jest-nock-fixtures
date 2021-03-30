@@ -1,6 +1,6 @@
 const { expect } = global;
 
-describe('implementation', () => {
+describe.skip('implementation', () => {
   it('1 is 1', async () => {
     expect(1).toBe(1);
   });
