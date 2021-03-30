@@ -3,7 +3,6 @@ const { existsSync, readFileSync, writeFileSync, unlinkSync, rmdirSync } = requi
 const { sortBy, without } = require('lodash');
 const mkdirp = require('mkdirp'); // eslint-disable-line import/no-extraneous-dependencies
 const nock = require('nock'); // eslint-disable-line import/no-extraneous-dependencies
-const stableHash = require('./stableHash');
 const chalk = require("chalk");
 
 const { yellow, red, blue } = chalk;
