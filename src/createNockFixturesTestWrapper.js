@@ -31,12 +31,7 @@ const getTestPath = () => expect.getState().testPath;
 
 function createNockFixturesTestWrapper(options = {}) {
   const {
-    beforeAll,
-    afterAll,
-    // // TODO: added
-    beforeEach,
-    afterEach,
-    // // end TODO: added
+    jasmine,
     fixtureFolderName = '__nocks__',
     // by default this is passed the `fixtureFolderName` supplied above
     getFixtureFolderName = folderName => folderName,
@@ -52,6 +47,14 @@ function createNockFixturesTestWrapper(options = {}) {
         unmatchedRequests.length
       }). Looking for fixtures at ${fixtureFilepath}. Record fixtures and try again.`,
   } = options;
+
+  const {
+    beforeEach,
+    afterEach,
+    beforeAll,
+    afterAll,
+    addReporter,
+  } = jasmine.getEnv();
 
   const isRecordingMode = () => mode === MODES.RECORD;
   const isLockdownMode = () => mode === MODES.LOCKDOWN;
@@ -87,7 +90,7 @@ function createNockFixturesTestWrapper(options = {}) {
 
   // const originalConsoleLog = console.log;
   // console.log = console.warn = console.error = () => {};
-
+  console.log('getEnv', jasmine.getEnv());
 
   // let uniqueTestName;
   // TODO: better comment
@@ -122,7 +125,7 @@ function createNockFixturesTestWrapper(options = {}) {
 
   const allTests = [];
 
-  global.jasmine.getEnv().addReporter({
+  addReporter({
     jasmineStarted: (...args) => {
       // load pre-recorded fixture file if it exists
       if (existsSync(fixtureFilepath())) {
@@ -374,7 +377,7 @@ function createNockFixturesTestWrapper(options = {}) {
     //   captured
     // });
 
-    // console.log('global.jasming', global.jasmine.getEnv())
+    // console.log('jasming', jasmine.getEnv())
   });
 }
 

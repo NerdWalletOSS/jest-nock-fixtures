@@ -61,11 +61,8 @@ module.exports = function createJestNockFixturesTestWrapper(options) {
       `unmatched requests not allowed (found ${
         reqs.length
       }). Looking for fixtures at ${fixtureFilepath}\n\nRun with env variable \`JEST_NOCK_FIXTURES_MODE=record\` to update fixtures.`,
-    beforeAll = global.beforeAll,
-    afterAll = global.afterAll,
-    // TODO: added
-    beforeEach = global.beforeEach,
-    afterEach = global.afterEach,
+    // TODO: added, organize and comment this
+    jasmine = global.jasmine,
   } = options;
 
   console.log('createJestNockFixturesTestWrapper', {
@@ -81,11 +78,7 @@ module.exports = function createJestNockFixturesTestWrapper(options) {
     getFixtureFolderName,
     getTestPath,
     logNamePrefix,
-    beforeAll,
-    afterAll,
-    // TODO: added
-    beforeEach,
-    afterEach,
+    jasmine,
   });
 };
 
