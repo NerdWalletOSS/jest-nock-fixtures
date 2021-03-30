@@ -229,10 +229,6 @@ function createNockFixturesTestWrapper(options = {}) {
     },
     [RECORD]: {
       apply() {
-        // explicitly enableNetConnect for dry-run
-        // TODO: is this necessary for record mode?
-        nock.enableNetConnect();
-
         nock.recorder.rec({
           dont_print: true,
           output_objects: true,
