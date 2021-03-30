@@ -34,12 +34,6 @@ function getJestGlobalState() {
   );
 }
 
-function getJestGlobalTestPath() {
-  const jestGlobalState = getJestGlobalState();
-  const { state } = jestGlobalState;
-  return state.testPath;
-}
-
 function getJestNockFixtureFolderName(fixtureFolderName) {
   const jestGlobalState = getJestGlobalState();
   const { state } = jestGlobalState;
@@ -55,7 +49,7 @@ module.exports = function createJestNockFixturesTestWrapper(options) {
     mode = getMode(),
     fixtureFolderName = '__nocks__',
     getFixtureFolderName = getJestNockFixtureFolderName,
-    getTestPath = getJestGlobalTestPath,
+    // getTestPath = getJestGlobalTestPath,
     logNamePrefix = 'jest-nock-fixtures',
     unmatchedErrorMessage = (reqs, { fixtureFilepath }) =>
       `unmatched requests not allowed (found ${
@@ -76,7 +70,6 @@ module.exports = function createJestNockFixturesTestWrapper(options) {
     fixtureFolderName,
     unmatchedErrorMessage,
     getFixtureFolderName,
-    getTestPath,
     logNamePrefix,
     jasmine,
   });

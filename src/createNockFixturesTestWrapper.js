@@ -36,11 +36,6 @@ function createNockFixturesTestWrapper(options = {}) {
     getFixtureFolderName = folderName => folderName,
     mode = MODES.DRYRUN,
     logNamePrefix = 'createNockFixturesTestWrapper',
-    // getTestPath = () => {
-    //   throw new Error(
-    //     'createNockFixturesTestWrapper: options.getTestPath must be a function'
-    //   );
-    // },
     unmatchedErrorMessage = (unmatchedRequests, { fixtureFilepath }) =>
       `unmatched requests not allowed (found ${
         unmatchedRequests.length
@@ -133,7 +128,6 @@ function createNockFixturesTestWrapper(options = {}) {
         print(yellow(`loaded nock fixture file: ${fixtureFilepath()}`));        
       }
     },
-    // specStarted: result => {
     specStarted: result => {
       console.log('specStarted', result)
       allTests.push(result);
@@ -163,20 +157,12 @@ function createNockFixturesTestWrapper(options = {}) {
       }
 
       // Determine if test should be cleaned up
-      const fixturesToRemove = without(
+      without(
         Object.keys(fixture),
         ...allTests.map(
           (result) => result[SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT].uniqueTestName,
         )
-      );
-      // console.log({
-      //   fixturesToRemove,
-      //   fixtureKeys: Object.keys(fixture),
-      //   allTests: allTests.map(
-      //     (result) => result[SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT].uniqueTestName,
-      //   )
-      // });
-      fixturesToRemove.forEach(name => {
+      ).forEach(name => {
         delete fixture[name];
         print(yellow(`Removed obsolete fixture entry for ${name}`));
       });
