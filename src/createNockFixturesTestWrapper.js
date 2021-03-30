@@ -1,10 +1,10 @@
 const { dirname, basename, join } = require('path');
 const { existsSync, readFileSync, writeFileSync, unlinkSync, rmdirSync } = require('fs');
-const { sortBy, without } = require('lodash');
+const { sortBy, without, before } = require('lodash');
 const mkdirp = require('mkdirp'); // eslint-disable-line import/no-extraneous-dependencies
 const nock = require('nock'); // eslint-disable-line import/no-extraneous-dependencies
 const chalk = require("chalk");
-
+const { MODE: { DRYRUN, LOCKDOWN, RECORD, WILD } } = require('./mode');
 const { yellow, red, blue } = chalk;
 
 const { pendingMocks, activeMocks } = nock;
@@ -27,6 +27,295 @@ const NOCK_NO_MATCH_EVENT = 'no match';
 // TODO: reuse getJestGlobalState from jest-nock-fixtures file
 const getCurrentTestName = () => expect.getState().currentTestName;
 const getTestPath = () => expect.getState().testPath;
+
+// class NockFixturesTestWrapper {
+//   constructor(options = {}) {
+//     this.options = options;
+
+//     this.currentResult = null;
+//     this.captured = {};
+//     this.fixture = {};
+//     this.uniqueTestNameCounters = new Map();
+//     this.currentTestName = null;
+
+//     // keeping track of unmatched requests when not recording
+//     // is used to provide hints that fixtures need to be recorded
+//     // and to fail the tests in 'lockdown' mode (most useful in CI)
+//     this.unmatched = [];
+//   }
+
+//   get fixtureDir() {
+//     const { fixtureFolderName, getFixtureFolderName } = this.options;
+//     return join(dirname(getTestPath()), getFixtureFolderName(fixtureFolderName));
+//   }
+//   get fixtureFilename() {
+//     return `${basename(getTestPath())}.json`;
+//   }
+//   get fixtureFilepath() {
+//     return join(this.fixtureDir, this.fixtureFilename);
+//   }
+
+//   handleUnmatchedRequest = req => {
+//     console.log(yellow.bold('HANDLE UNMATCHED'));
+//     this.unmatched.push(req);
+//   };
+
+//   addJasmineReporter() {
+
+//   }
+
+//   lifecycles = {
+//     [WILD]: {
+//       setup() {},
+//       apply() {},
+//       finished() {},
+//     },
+//     [DRYRUN]: {
+//       setup() {
+//         if (!nock.isActive()) {
+//           nock.activate();
+//         }
+//       },
+//       apply() {
+//         nock.restore();
+
+//         if (!nock.isActive()) {
+//           nock.activate();
+//         }
+//         // explicitly enableNetConnect for dry-run
+//         nock.enableNetConnect();
+
+//         // define mocks from previously recorded fixture
+//         const recordings = fixture[uniqueTestName] || [];
+//         nock.define(recordings);
+//         this.print(yellow(`Defined (${recordings.length}) request mocks for '${uniqueTestName}'`));  
+//         // track requests that were not mocked
+//         nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, this.handleUnmatchedRequest);
+//         nock.emitter.on(NOCK_NO_MATCH_EVENT, this.handleUnmatchedRequest);
+//       },
+//       finished() {
+//         // report about unmatched requests
+//         if (this.unmatched.length) {
+//           print(
+//             yellow(
+//               `${cachedUnmatched.length} unmatched requests`
+//             )
+//           );
+//         }
+//       },
+//     },
+//     [LOCKDOWN]: {
+//       setup() {
+//         if (!nock.isActive()) {
+//           nock.activate();
+//         }
+//       },
+//       apply() {
+//         nock.restore();
+
+//         if (!nock.isActive()) {
+//           nock.activate();
+//         }
+
+//         nock.disableNetConnect();
+
+//         // define mocks from previously recorded fixture
+//         const recordings = fixture[uniqueTestName] || [];
+//         nock.define(recordings);
+//         this.print(yellow(`Defined (${recordings.length}) request mocks for '${uniqueTestName}'`));
+//         // track requests that were not mocked
+//         nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, this.handleUnmatchedRequest);
+//         nock.emitter.on(NOCK_NO_MATCH_EVENT, this.handleUnmatchedRequest);
+//       },
+//       finished() {
+//         // error on unmatched requests
+//         if (this.unmatched.length) {
+//           throw new Error(
+//             message(
+//               chalk.red(`${unmatchedErrorMessage(cachedUnmatched, {
+//                 fixtureFilepath: fixtureFilepath(),
+//               })}`)
+//             )
+//           )
+//         }
+//       },
+//     },
+//     [RECORD]: {
+//       setup() {
+//         if (!nock.isActive()) {
+//           nock.activate();
+//         }
+//       },
+//       apply() {
+//         nock.restore();
+
+//         if (!nock.isActive()) {
+//           nock.activate();
+//           // nock.enableNetConnect();
+//         }
+
+//         // explicitly enableNetConnect for dry-run
+//         // TODO: is this necessary for record mode?
+//         nock.enableNetConnect();
+
+//         nock.recorder.rec({
+//           dont_print: true,
+//           output_objects: true,
+//         });
+//       },
+//       finished() {
+//         // TODO: nock operations should be in jasmine before/after(each/all) functions
+//         let recordings = nock.recorder.play();
+//         console.log(yellow('recordings.length', recordings.length));
+//         // console.log('recordings', recordings);
+//         nock.recorder.clear();
+//         // // nock.restore();
+
+//         if (recordings.length > 0) {
+//           this.captured[this.currentUniqueTestName] = recordings;
+//           // message what happened
+//           print(
+//             yellow(
+//               `Recorded requests: ${recordings.length}`
+//             )
+//           );
+//         } else if (this.fixture.hasOwnProperty(this.currentUniqueTestName)) {
+//           // console.log(red('TODO: cleanup fixtures.hasOwnProperty(uniqueTestName)', uniqueTestName));
+//           delete this.fixture[this.currentUniqueTestName];
+//         }
+//       }
+//     }
+//   }
+
+
+// }
+
+/*
+
+  beforeEach(() => {
+    // console.log('CURRENT RESULT BE', currentResult);
+    const { uniqueTestName } = currentResult[SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT];
+
+    unmatched = [];
+
+    nock.restore();
+
+    if (!nock.isActive()) {
+      nock.activate();
+      // nock.enableNetConnect();
+    }
+
+    // explicitly enableNetConnect for dry-run
+    nock.enableNetConnect();
+
+    if (isRecordingMode()) {
+      nock.recorder.rec({
+        dont_print: true,
+        output_objects: true,
+      });
+    } else {
+      console.log('fixtureFilepath()', fixtureFilepath())
+      if (!isWildMode() && existsSync(fixtureFilepath())) {
+        // define mocks from previously recorded fixture
+        const recordings = fixture[uniqueTestName] || [];
+        // console.log('LOADED RECORDINGS', recordings);
+        // console.log('recordings', recordings && recordings.length);
+        nock.define(recordings);
+        print(
+          yellow(`Defined (${
+            recordings.length
+          }) request mocks for '${uniqueTestName}'`)
+        );
+      // } else {
+      //   console.log(red('CONDITION DID NOT PASS'), 
+      //     !isWildMode(), existsSync(fixtureFilepath()),
+      //     fixtureFilepath()
+      //   )
+      }
+
+      // track requests that were not mocked
+      nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+      nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+
+      if (isLockdownMode()) {
+        // console.log(yellow("LOCKDOWN MODE"));
+        nock.disableNetConnect();
+      } else {
+        // nock.enableNetConnect();
+        // console.log(yellow('NOT LOCKDOWN MODE'))
+      }
+    }
+  });
+*/
+
+/*
+
+  // TODO: cleanup this block
+  afterEach(() => {
+    if (isRecordingMode()) {
+      // TODO: nock operations should be in jasmine before/after(each/all) functions
+      let recordings = nock.recorder.play();
+      console.log(yellow('recordings.length', recordings.length));
+      // console.log('recordings', recordings);
+      nock.recorder.clear();
+      // // nock.restore();
+
+      if (recordings.length > 0) {
+        captured[uniqueTestName()] = recordings;
+        // message what happened
+        print(
+          yellow(
+            `${mode}: Recorded requests: ${recordings.length}`
+          )
+        );
+      } else if (fixture.hasOwnProperty(uniqueTestName())) {
+        // console.log(red('TODO: cleanup fixtures.hasOwnProperty(uniqueTestName)', uniqueTestName));
+        delete fixture[uniqueTestName()];
+      }
+    }
+
+    const cachedUnmatched = unmatched;
+    // console.log('cachedUnmatched', cachedUnmatched);
+    // report about unmatched requests
+    if (cachedUnmatched.length) {
+      if (isLockdownMode()) {
+        throw new Error(
+          message(
+            chalk.red(`${unmatchedErrorMessage(cachedUnmatched, {
+              fixtureFilepath: fixtureFilepath(),
+            })}`)
+          )
+        )
+      } else if (isDryrunMode()) {
+        print(
+          yellow(
+            `${cachedUnmatched.length} unmatched requests`
+          )
+        );
+      }
+    }
+  });
+
+  afterAll(() => {
+    const { uniqueTestName } = currentResult[SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT];
+    const cachedUnmatched = unmatched;
+
+    // TODO: added this
+    // Avoid memory-leaks: https://github.com/nock/nock/issues/2057#issuecomment-666494539
+    nock.restore();
+    // full cleanup
+    nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+    unmatched = [];
+    nock.cleanAll();
+    nock.enableNetConnect();
+
+    // console.log('after all', {
+    //   captured
+    // });
+
+    // console.log('jasming', jasmine.getEnv())
+  });
+  */
 
 function createNockFixturesTestWrapper(options = {}) {
   const {
@@ -156,7 +445,8 @@ function createNockFixturesTestWrapper(options = {}) {
         return;
       }
 
-      // Determine if test should be cleaned up
+      // when tests are *deleted*, remove the associated fixture
+      // TODO: do this in after all
       without(
         Object.keys(fixture),
         ...allTests.map(
@@ -207,11 +497,7 @@ function createNockFixturesTestWrapper(options = {}) {
       // }
       } else if (existsSync(fixtureFilepath())) {
         // cleanup obsolete nock fixture file and dir if they exist
-        print( // eslint-disable-line no-console,prettier/prettier
-          yellow(
-            `Nothing recorded, cleaning up ${fixtureFilepath()}.`
-          )
-        );
+        print(yellow(`Nothing recorded, cleaning up ${fixtureFilepath()}.`));
         console.log(red('TODO: CLEANUP', uniqueTestName));
         // remove the fixture file
         unlinkSync(fixtureFilepath());
@@ -219,9 +505,7 @@ function createNockFixturesTestWrapper(options = {}) {
         try {
           rmdirSync(fixtureDir());
           // message what happened
-          print( // eslint-disable-line no-console,prettier/prettier
-            yellow(`Cleaned up ${fixtureDir()} because no fixtures were left.`)
-          );
+          print(yellow(`Cleaned up ${fixtureDir()} because no fixtures were left.`));
           // console.warn( // eslint-disable-line no-console,prettier/prettier
           //   `${logNamePrefix}: ${mode}: Cleaned up ${fixtureDir()} because no fixtures were left.`
           // );
@@ -232,6 +516,125 @@ function createNockFixturesTestWrapper(options = {}) {
   
     }
   });
+
+  const lifecycles = {
+    [DRYRUN]: {
+      setup() {
+        if (!nock.isActive()) {
+          nock.activate();
+        }
+      },
+      apply() {
+        nock.restore();
+
+        if (!nock.isActive()) {
+          nock.activate();
+        }
+        // explicitly enableNetConnect for dry-run
+        nock.enableNetConnect();
+
+        // define mocks from previously recorded fixture
+        const recordings = fixture[uniqueTestName()] || [];
+        nock.define(recordings);
+        print(yellow(`Defined (${recordings.length}) request mocks for '${uniqueTestName()}'`));  
+        // track requests that were not mocked
+        nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+        nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+      },
+      finish() {
+        // report about unmatched requests
+        if (unmatched.length) {
+          print(
+            yellow(
+              `${unmatched.length} unmatched requests`
+            )
+          );
+        }
+      },
+    },
+    [LOCKDOWN]: {
+      setup() {
+        if (!nock.isActive()) {
+          nock.activate();
+        }
+      },
+      apply() {
+        nock.restore();
+
+        if (!nock.isActive()) {
+          nock.activate();
+        }
+
+        nock.disableNetConnect();
+
+        // define mocks from previously recorded fixture
+        const recordings = fixture[uniqueTestName()] || [];
+        nock.define(recordings);
+        print(yellow(`Defined (${recordings.length}) request mocks for '${uniqueTestName()}'`));
+        // track requests that were not mocked
+        nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+        nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+      },
+      finish() {
+        // error on unmatched requests
+        if (unmatched.length) {
+          throw new Error(
+            message(
+              chalk.red(`${unmatchedErrorMessage(unmatched, {
+                fixtureFilepath: fixtureFilepath(),
+              })}`)
+            )
+          )
+        }
+      },
+    },
+    [RECORD]: {
+      setup() {
+        if (!nock.isActive()) {
+          nock.activate();
+        }
+      },
+      apply() {
+        nock.restore();
+
+        if (!nock.isActive()) {
+          nock.activate();
+          // nock.enableNetConnect();
+        }
+
+        // explicitly enableNetConnect for dry-run
+        // TODO: is this necessary for record mode?
+        nock.enableNetConnect();
+
+        nock.recorder.rec({
+          dont_print: true,
+          output_objects: true,
+        });
+      },
+      finish() {
+        // TODO: nock operations should be in jasmine before/after(each/all) functions
+        let recordings = nock.recorder.play();
+        console.log(yellow('recordings.length', recordings.length));
+        // console.log('recordings', recordings);
+        nock.recorder.clear();
+        // // nock.restore();
+
+        if (recordings.length > 0) {
+          captured[uniqueTestName()] = recordings;
+          // message what happened
+          print(yellow(`Recorded requests: ${recordings.length}`));
+        } else if (fixture.hasOwnProperty(uniqueTestName())) {
+          // console.log(red('TODO: cleanup fixtures.hasOwnProperty(uniqueTestName)', uniqueTestName));
+          delete fixture[uniqueTestName()];
+        }
+      }
+    },
+    [WILD]: {
+      setup() {},
+      apply() {},
+      finish() {},
+    },
+  };
 
   beforeAll(() => {
     if (!nock.isActive()) {
@@ -257,92 +660,95 @@ function createNockFixturesTestWrapper(options = {}) {
       // nock.enableNetConnect();
     }
 
-    // explicitly enableNetConnect for dry-run
-    nock.enableNetConnect();
+    lifecycles[mode].apply();
+    // // explicitly enableNetConnect for dry-run
+    // nock.enableNetConnect();
 
-    if (isRecordingMode()) {
-      nock.recorder.rec({
-        dont_print: true,
-        output_objects: true,
-      });  
-    } else {
-      console.log('fixtureFilepath()', fixtureFilepath())
-      if (!isWildMode() && existsSync(fixtureFilepath())) {
-        // define mocks from previously recorded fixture
-        const recordings = fixture[uniqueTestName] || [];
-        // console.log('LOADED RECORDINGS', recordings);
-        // console.log('recordings', recordings && recordings.length);
-        nock.define(recordings);
-        print(
-          yellow(`Defined (${
-            recordings.length
-          }) request mocks for '${uniqueTestName}'`)
-        );
-      // } else {
-      //   console.log(red('CONDITION DID NOT PASS'), 
-      //     !isWildMode(), existsSync(fixtureFilepath()),
-      //     fixtureFilepath()
-      //   )
-      }
+    // if (isRecordingMode()) {
+    //   nock.recorder.rec({
+    //     dont_print: true,
+    //     output_objects: true,
+    //   });  
+    // } else {
+    //   console.log('fixtureFilepath()', fixtureFilepath())
+    //   if (!isWildMode() && existsSync(fixtureFilepath())) {
+    //     // define mocks from previously recorded fixture
+    //     const recordings = fixture[uniqueTestName] || [];
+    //     // console.log('LOADED RECORDINGS', recordings);
+    //     // console.log('recordings', recordings && recordings.length);
+    //     nock.define(recordings);
+    //     print(
+    //       yellow(`Defined (${
+    //         recordings.length
+    //       }) request mocks for '${uniqueTestName}'`)
+    //     );
+    //   // } else {
+    //   //   console.log(red('CONDITION DID NOT PASS'), 
+    //   //     !isWildMode(), existsSync(fixtureFilepath()),
+    //   //     fixtureFilepath()
+    //   //   )
+    //   }
 
-      // track requests that were not mocked
-      nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-      nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+    //   // track requests that were not mocked
+    //   nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+    //   nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
 
-      if (isLockdownMode()) {
-        // console.log(yellow("LOCKDOWN MODE"));
-        nock.disableNetConnect();
-      } else {
-        // nock.enableNetConnect();
-        // console.log(yellow('NOT LOCKDOWN MODE'))
-      }
-    }
+    //   if (isLockdownMode()) {
+    //     // console.log(yellow("LOCKDOWN MODE"));
+    //     nock.disableNetConnect();
+    //   } else {
+    //     // nock.enableNetConnect();
+    //     // console.log(yellow('NOT LOCKDOWN MODE'))
+    //   }
+    // }
   });
 
   // TODO: cleanup this block
   afterEach(() => {
-    if (isRecordingMode()) {
-      // TODO: nock operations should be in jasmine before/after(each/all) functions
-      let recordings = nock.recorder.play();
-      console.log(yellow('recordings.length', recordings.length));
-      // console.log('recordings', recordings);
-      nock.recorder.clear();
-      // // nock.restore();
+    lifecycles[mode].finish();
 
-      if (recordings.length > 0) {
-        captured[uniqueTestName()] = recordings;
-        // message what happened
-        print(
-          yellow(
-            `${mode}: Recorded requests: ${recordings.length}`
-          )
-        );
-      } else if (fixture.hasOwnProperty(uniqueTestName())) {
-        // console.log(red('TODO: cleanup fixtures.hasOwnProperty(uniqueTestName)', uniqueTestName));
-        delete fixture[uniqueTestName()];
-      }
-    }
+    // if (isRecordingMode()) {
+    //   // TODO: nock operations should be in jasmine before/after(each/all) functions
+    //   let recordings = nock.recorder.play();
+    //   console.log(yellow('recordings.length', recordings.length));
+    //   // console.log('recordings', recordings);
+    //   nock.recorder.clear();
+    //   // // nock.restore();
 
-    const cachedUnmatched = unmatched;
-    // console.log('cachedUnmatched', cachedUnmatched);
-    // report about unmatched requests
-    if (cachedUnmatched.length) {
-      if (isLockdownMode()) {
-        throw new Error(
-          message(
-            chalk.red(`${unmatchedErrorMessage(cachedUnmatched, {
-              fixtureFilepath: fixtureFilepath(),
-            })}`)
-          )
-        )
-      } else if (isDryrunMode()) {
-        print(
-          yellow(
-            `${cachedUnmatched.length} unmatched requests`
-          )
-        );
-      }
-    }
+    //   if (recordings.length > 0) {
+    //     captured[uniqueTestName()] = recordings;
+    //     // message what happened
+    //     print(
+    //       yellow(
+    //         `${mode}: Recorded requests: ${recordings.length}`
+    //       )
+    //     );
+    //   } else if (fixture.hasOwnProperty(uniqueTestName())) {
+    //     // console.log(red('TODO: cleanup fixtures.hasOwnProperty(uniqueTestName)', uniqueTestName));
+    //     delete fixture[uniqueTestName()];
+    //   }
+    // }
+
+    // const cachedUnmatched = unmatched;
+    // // console.log('cachedUnmatched', cachedUnmatched);
+    // // report about unmatched requests
+    // if (cachedUnmatched.length) {
+    //   if (isLockdownMode()) {
+    //     throw new Error(
+    //       message(
+    //         chalk.red(`${unmatchedErrorMessage(cachedUnmatched, {
+    //           fixtureFilepath: fixtureFilepath(),
+    //         })}`)
+    //       )
+    //     )
+    //   } else if (isDryrunMode()) {
+    //     print(
+    //       yellow(
+    //         `${cachedUnmatched.length} unmatched requests`
+    //       )
+    //     );
+    //   }
+    // }
   });
 
   afterAll(() => {
