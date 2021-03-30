@@ -426,6 +426,7 @@ function createNockFixturesTestWrapper(options = {}) {
 
     // unmatched = [];
 
+    nock.cleanAll();
     nock.restore();
 
     if (!nock.isActive()) {
