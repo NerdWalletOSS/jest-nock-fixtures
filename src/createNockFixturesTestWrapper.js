@@ -42,10 +42,6 @@ function createNockFixturesTestWrapper(options = {}) {
       }). Looking for fixtures at ${fixtureFilepath}. Record fixtures and try again.`,
   } = options;
 
-  if (mode === WILD) {
-    return;
-  }
-
   const {
     beforeEach,
     afterEach,
@@ -54,14 +50,6 @@ function createNockFixturesTestWrapper(options = {}) {
     addReporter,
   } = jasmine.getEnv();
 
-  // keeping track of unmatched requests when not recording
-  // is used to provide hints that fixtures need to be recorded
-  // and to fail the tests in 'lockdown' mode (most useful in CI)
-  let unmatched = [];
-  const handleUnmatchedRequest = req => {
-    print(yellow.bold('HANDLE UNMATCHED'));
-    unmatched.push(req);
-  }
 
   // let fixture;
 
@@ -83,7 +71,7 @@ function createNockFixturesTestWrapper(options = {}) {
 
   // const originalConsoleLog = console.log;
   // console.log = console.warn = console.error = () => {};
-  // console.log('getEnv', jasmine.getEnv());
+  console.log('getEnv', jasmine.getEnv());
 
   // let uniqueTestName;
   // TODO: better comment
@@ -103,6 +91,17 @@ function createNockFixturesTestWrapper(options = {}) {
   // TODO: maybe just store this globally
   const uniqueTestName = () => currentResult?.[SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT].uniqueTestName;
 
+  const allTests = [];
+
+  // keeping track of unmatched requests when not recording
+  // is used to provide hints that fixtures need to be recorded
+  // and to fail the tests in 'lockdown' mode (most useful in CI)
+  let unmatched = [];
+  const handleUnmatchedRequest = req => {
+    print(yellow.bold('HANDLE UNMATCHED'));
+    unmatched.push(req);
+  }
+
   // utility for creating user messages
   const message = (str) => 
     // `${chalk.cyan(`${logNamePrefix}`)}: ${chalk.yellow(`${mode}`)}: ${str}`;
@@ -117,8 +116,10 @@ function createNockFixturesTestWrapper(options = {}) {
   // utility for logging user messages
   const print = (str) => console.log(message(str));
 
-
-  const allTests = [];
+  if (mode === WILD) {
+    print('Not intercepting any requests in \'wild\' mode');
+    return;
+  }
 
   addReporter({
     jasmineStarted: (...args) => {
@@ -310,17 +311,24 @@ function createNockFixturesTestWrapper(options = {}) {
     },
   };
 
+  beforeAll(() => {
+    // nock.activate();
+    if (!nock.isActive()) {
+      nock.activate();
+    }
+  })
+
   beforeEach(() => {
 
     // Remove mocks between unit tests so they run in isolation
     nock.cleanAll();
 
     // TODO: COMMENT
-    nock.restore();
+    // nock.restore();
 
-    if (!nock.isActive()) {
-      nock.activate();
-    }
+    // if (!nock.isActive()) {
+    //   nock.activate();
+    // }
 
         // // track requests that were not mocked
         // nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
