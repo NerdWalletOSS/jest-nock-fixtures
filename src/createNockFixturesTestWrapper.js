@@ -26,7 +26,7 @@ const NOCK_NO_MATCH_EVENT = 'no match';
 // TODO: expect comes from global
 // TODO: reuse getJestGlobalState from jest-nock-fixtures file
 const getCurrentTestName = () => expect.getState().currentTestName;
-const getTestPath = () => expect.getState().testPath;
+// const getTestPath = () => expect.getState().testPath;
 
 function createNockFixturesTestWrapper(options = {}) {
   const {
@@ -34,6 +34,11 @@ function createNockFixturesTestWrapper(options = {}) {
     fixtureFolderName = '__nocks__',
     // by default this is passed the `fixtureFolderName` supplied above
     getFixtureFolderName = folderName => folderName,
+    getTestPath = () => {
+      throw new Error(
+        'createNockFixturesTestWrapper: options.getTestPath must be a function'
+      );
+    },
     mode = MODES.DRYRUN,
     logNamePrefix = 'createNockFixturesTestWrapper',
     unmatchedErrorMessage = (unmatchedRequests, { fixtureFilepath }) =>
@@ -144,10 +149,10 @@ function createNockFixturesTestWrapper(options = {}) {
 
       currentResult = result;
 
-      // track requests that were not mocked
-      unmatched = [];
-      nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-      nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+      // // track requests that were not mocked
+      // unmatched = [];
+      // nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+      // nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
 
       // TODO: namespace this
     },
@@ -169,6 +174,7 @@ function createNockFixturesTestWrapper(options = {}) {
 
         // define mocks from previously recorded fixture
         const recordings = fixture[uniqueTestName()] || [];
+        print('recordings', recordings.length);
         nock.define(recordings);
         print(yellow(`Defined (${recordings.length}) request mocks for '${uniqueTestName()}'`));  
         // // track requests that were not mocked
@@ -224,7 +230,7 @@ function createNockFixturesTestWrapper(options = {}) {
       finish() {
         // TODO: nock operations should be in jasmine before/after(each/all) functions
         let recordings = nock.recorder.play();
-        console.log(yellow('recordings.length', recordings.length));
+        print(yellow('recordings.length', recordings.length));
         // console.log('recordings', recordings);
         nock.recorder.clear();
         // // nock.restore();
@@ -311,29 +317,34 @@ function createNockFixturesTestWrapper(options = {}) {
     },
   };
 
-  beforeAll(() => {
-    if (!nock.isActive()) {
-      nock.activate();
-    }
-  })
+  // beforeAll(() => {
+  //   if (!nock.isActive()) {
+  //     nock.activate();
+  //   }
+  // })
 
   beforeEach(() => {
-
+    print('beforeEach start');
     // Remove mocks between unit tests so they run in isolation
     nock.cleanAll();
     // Prevent memory leaks and
     // ensure that previous recorder session is cleared when in 'record' mode
     nock.restore();
 
-    // if (!nock.isActive()) {
-    //   nock.activate();
-    // }
+    if (!nock.isActive()) {
+      nock.activate();
+    }
+
+    // track requests that were not mocked
+    unmatched = [];
+    nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+    nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
 
         // // track requests that were not mocked
         // nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
         // nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
 
-    
+    print('beforeEach apply');
     lifecycles[mode].apply();
 
   });
