@@ -16,15 +16,6 @@ const { yellow, red, cyan, grey } = chalk;
 
 const SYMBOL_FOR_NOCK_FIXTURES = Symbol('nock-fixtures');
 
-// // TODO:  there is a ./mode file now.  use that.
-// const MODES = {
-//   DRYRUN: 'dryrun',
-//   LOCKDOWN: 'lockdown',
-//   RECORD: 'record',
-//   WILD: 'wild',
-// };
-// const { DRYRUN, LOCKDOWN, RECORD, WILD } = MODES;
-
 // https://github.com/nock/nock#events
 const NOCK_NO_MATCH_EVENT = 'no match';
 

@@ -1,4 +1,4 @@
-// TODO: EW.  All of this process.env interaction directly is disgusting
+// TODO: EW.  All of this process.env interaction directly is gross
 
 const MODES = {
   DRYRUN: 'dryrun',
