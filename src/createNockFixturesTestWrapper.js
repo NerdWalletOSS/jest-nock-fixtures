@@ -312,7 +312,6 @@ function createNockFixturesTestWrapper(options = {}) {
   };
 
   beforeAll(() => {
-    // nock.activate();
     if (!nock.isActive()) {
       nock.activate();
     }
@@ -322,9 +321,9 @@ function createNockFixturesTestWrapper(options = {}) {
 
     // Remove mocks between unit tests so they run in isolation
     nock.cleanAll();
-
-    // TODO: COMMENT
-    // nock.restore();
+    // Prevent memory leaks and
+    // ensure that previous recorder session is cleared when in 'record' mode
+    nock.restore();
 
     // if (!nock.isActive()) {
     //   nock.activate();
