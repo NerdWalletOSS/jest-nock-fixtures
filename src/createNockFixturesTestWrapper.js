@@ -6,7 +6,7 @@ const {
   unlinkSync,
   rmdirSync,
 } = require('fs');
-const { has, without, uniq } = require('lodash');
+const { has, without } = require('lodash');
 const mkdirp = require('mkdirp'); // eslint-disable-line import/no-extraneous-dependencies
 const nock = require('nock'); // eslint-disable-line import/no-extraneous-dependencies
 const chalk = require('chalk');
@@ -71,9 +71,7 @@ function createNockFixturesTestWrapper(options = {}) {
   // a map to store counter for duplicated test names
   const uniqueTestNameCounters = new Map();
   const uniqueTestName = (result = currentResult) =>
-    result
-      ? result[SYMBOL_FOR_NOCK_FIXTURES].uniqueTestName
-      : null;
+    result ? result[SYMBOL_FOR_NOCK_FIXTURES].uniqueTestName : null;
 
   // keeping track of unmatched requests when not recording
   // is used to provide hints that fixtures need to be recorded
@@ -98,20 +96,24 @@ function createNockFixturesTestWrapper(options = {}) {
   // eslint-disable-next-line no-console
   const print = str => console.log(message(str));
 
+  // ensure a valid mode is being used
+  if (!Object.values(MODES).includes(mode)) {
+    throw new Error(
+      message(
+        `unrecognized mode: ${JSON.stringify(
+          mode
+        )}. Mode must be one of the following: ${Object.values(MODES).join(
+          ', '
+        )}`
+      )
+    );
+  }
+
   // "wild" mode allows all http requests, records none, plays back none
   if (mode === MODES.WILD) {
     print("Not intercepting any requests in 'wild' mode");
     return;
   }
-
-  // add reporters and test lifecycle logic
-  // const {
-  //   beforeEach,
-  //   afterEach,
-  //   beforeAll,
-  //   afterAll,
-  //   // addReporter,
-  // } = jasmine.getEnv();
 
   // add reporter to jasmine environment to track tests as they are run
   jasmine.getEnv().addReporter({
@@ -134,19 +136,8 @@ function createNockFixturesTestWrapper(options = {}) {
     },
   });
 
-  (function(lifecycles) {
-    if (!has(lifecycles, mode)) {
-      throw new Error(
-        message(
-          `unrecognized mode: ${JSON.stringify(
-            mode
-          )}. Mode must be one of the following: ${Object.values(MODES).join(
-            ', '
-          )}`
-        )
-      );
-    }
-
+  // adds test lifecycle logic
+  function attachLifecycleOperations(modeLifecycleOperations) {
     const { beforeEach, afterEach, beforeAll, afterAll } = jasmine.getEnv();
 
     beforeAll(() => {
@@ -169,12 +160,11 @@ function createNockFixturesTestWrapper(options = {}) {
     });
 
     beforeEach(() => {
-      print('beforeEach start');
       // Remove mocks between unit tests so they run in isolation
       // https://github.com/nock/nock/issues/2057#issuecomment-666494539
       nock.cleanAll();
-      // Prevent memory leaks and
-      // ensure that previous recorder session is cleared when in 'record' mode
+      // Prevent memory leaks and ensures that
+      // previous recorder session is cleared when in 'record' mode
       nock.restore();
 
       if (!nock.isActive()) {
@@ -186,12 +176,11 @@ function createNockFixturesTestWrapper(options = {}) {
       nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
       nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
 
-      print('beforeEach apply');
-      lifecycles[mode].apply();
+      modeLifecycleOperations.apply();
     });
 
     afterEach(() => {
-      lifecycles[mode].finish();
+      modeLifecycleOperations.finish();
     });
 
     afterAll(() => {
@@ -203,142 +192,145 @@ function createNockFixturesTestWrapper(options = {}) {
       nock.cleanAll();
       nock.enableNetConnect();
 
-      lifecycles[mode].cleanup();
+      modeLifecycleOperations.cleanup();
     });
-  })(
-    // TODO: comment about lifecycle and why they are defined this way
-    {
-      [MODES.DRYRUN]: {
-        apply() {
-          // explicitly enableNetConnect for dry-run
-          nock.enableNetConnect();
-          // define mocks from previously recorded fixture
-          const recordings = fixture[uniqueTestName()] || [];
-          print('recordings', recordings.length);
-          nock.define(recordings);
-          print(
-            yellow(
-              `Defined (${
-                recordings.length
-              }) request mocks for '${uniqueTestName()}'`
+  }
+
+  const modeLifecycles = {
+    [MODES.DRYRUN]: {
+      apply() {
+        // explicitly enableNetConnect for dry-run
+        nock.enableNetConnect();
+        // define mocks from previously recorded fixture
+        const recordings = fixture[uniqueTestName()] || [];
+        nock.define(recordings);
+        print(
+          yellow(
+            `Defined (${
+              recordings.length
+            }) request mocks for '${uniqueTestName()}'`
+          )
+        );
+      },
+      finish() {
+        // report about unmatched requests
+        if (unmatched.length) {
+          print(yellow(`${unmatched.length} unmatched requests`));
+        }
+      },
+      cleanup() {},
+    },
+    [MODES.LOCKDOWN]: {
+      apply() {
+        // http requests are NOT ALLOWED in 'lockdown' mode
+        nock.disableNetConnect();
+
+        // define mocks from previously recorded fixture
+        const recordings = fixture[uniqueTestName()] || [];
+        nock.define(recordings);
+        print(
+          yellow(
+            `Defined (${
+              recordings.length
+            }) request mocks for '${uniqueTestName()}'`
+          )
+        );
+      },
+      finish() {
+        // error on unmatched requests
+        if (unmatched.length) {
+          throw new Error(
+            message(
+              `${unmatchedErrorMessage(unmatched, {
+                fixtureFilepath: fixtureFilepath(),
+              })}`
             )
           );
-        },
-        finish() {
-          // report about unmatched requests
-          if (unmatched.length) {
-            print(yellow(`${unmatched.length} unmatched requests`));
-          }
-        },
-        cleanup() {},
+        }
       },
-      [MODES.LOCKDOWN]: {
-        apply() {
-          // http requests are NOT ALLOWED in 'lockdown' mode
-          nock.disableNetConnect();
+      cleanup() {},
+    },
+    [MODES.RECORD]: {
+      apply() {
+        nock.recorder.rec({
+          dont_print: true,
+          output_objects: true,
+        });
+      },
+      finish() {
+        const recordings = nock.recorder.play();
+        nock.recorder.clear();
 
-          // define mocks from previously recorded fixture
-          const recordings = fixture[uniqueTestName()] || [];
-          nock.define(recordings);
-          print(
-            yellow(
-              `Defined (${
-                recordings.length
-              }) request mocks for '${uniqueTestName()}'`
-            )
+        if (recordings.length > 0) {
+          fixture[uniqueTestName()] = recordings;
+          // message what happened
+          print(yellow(`Recorded ${recordings.length} request(s)`));
+        } else if (has(fixture, uniqueTestName())) {
+          delete fixture[uniqueTestName()];
+        }
+      },
+      cleanup() {
+        // when tests are *deleted*, remove the associated fixture
+        without(
+          Object.keys(fixture),
+          ...allJasmineTestResults.map(result => uniqueTestName(result))
+        ).forEach(name => {
+          delete fixture[name];
+          print(yellow(`Removed obsolete fixture entry for ${name}`));
+        });
+
+        // Save it: write the recordings to disk
+        if (Object.keys(fixture).length) {
+          // ensure fixtures folder exists
+          mkdirp.sync(fixtureDir());
+          // sort the fixture entries by the order they were defined in the test file
+          const sortedFixture = allJasmineTestResults.reduce((memo, result) => {
+            const name = uniqueTestName(result);
+            // eslint-disable-next-line no-param-reassign
+            memo[name] = fixture[name];
+            return memo;
+          }, {});
+          // write the fixture file
+          writeFileSync(
+            fixtureFilepath(),
+            JSON.stringify(sortedFixture, null, 2)
           );
-        },
-        finish() {
-          // error on unmatched requests
-          if (unmatched.length) {
-            throw new Error(
-              message(
-                `${unmatchedErrorMessage(unmatched, {
-                  fixtureFilepath: fixtureFilepath(),
-                })}`
-              )
-            );
-          }
-        },
-        cleanup() {},
-      },
-      [MODES.RECORD]: {
-        apply() {
-          nock.recorder.rec({
-            dont_print: true,
-            output_objects: true,
-          });
-        },
-        finish() {
-          const recordings = nock.recorder.play();
-          print(yellow('recordings.length', recordings.length));
-          nock.recorder.clear();
+          // message what happened
+          print(
+            yellow(`Wrote recordings to fixture file: ${fixtureFilepath()}`)
+          );
+          return;
+        }
 
-          if (recordings.length > 0) {
-            fixture[uniqueTestName()] = recordings;
-            // message what happened
-            print(yellow(`Recorded requests: ${recordings.length}`));
-          } else if (has(fixture, uniqueTestName())) {
-            delete fixture[uniqueTestName()];
-          }
-        },
-        cleanup() {
-          // when tests are *deleted*, remove the associated fixture
-          without(
-            Object.keys(fixture),
-            ...allJasmineTestResults.map(result => uniqueTestName(result))
-          ).forEach(name => {
-            delete fixture[name];
-            print(yellow(`Removed obsolete fixture entry for ${name}`));
-          });
-
-          if (Object.keys(fixture).length) {
-            // ensure fixtures folder exists
-            mkdirp.sync(fixtureDir());
-            // sort the fixture entries by the order in which they were encountered
-            const sortedFixture = allJasmineTestResults.reduce(
-              (memo, result) => {
-                const name = uniqueTestName(result);
-                if (has(fixture, name)) {
-                  memo[name] = fixture[name];
-                }
-                return memo;
-              },
-              {}
-            );
-            // write the fixture file
-            writeFileSync(
-              fixtureFilepath(),
-              JSON.stringify(sortedFixture, null, 2)
-            );
+        // Cleanup: remove previous fixture files previously written
+        // when nothing was captured in the recordings
+        if (existsSync(fixtureFilepath())) {
+          // cleanup obsolete nock fixture file and dir if they exist
+          print(yellow(`Nothing recorded, removing ${fixtureFilepath()}`));
+          // remove the fixture file
+          unlinkSync(fixtureFilepath());
+          // remove the directory if not empty
+          try {
+            rmdirSync(fixtureDir());
             // message what happened
             print(
-              yellow(`Wrote recordings to fixture file: ${fixtureFilepath()}`)
+              yellow(
+                `Removed ${fixtureDir()} directory because no fixtures were left.`
+              )
             );
-          } else if (existsSync(fixtureFilepath())) {
-            // cleanup obsolete nock fixture file and dir if they exist
-            print(yellow(`Nothing recorded, removing ${fixtureFilepath()}`));
-            // remove the fixture file
-            unlinkSync(fixtureFilepath());
-            // remove the directory if not empty
-            try {
-              rmdirSync(fixtureDir());
-              // message what happened
-              print(
-                yellow(
-                  `Removed ${fixtureDir()} directory because no fixtures were left.`
-                )
-              );
-            } catch (err) {
-              if (err.code !== 'ENOTEMPTY') {
-                throw err;
-              }
+          } catch (err) {
+            if (err.code !== 'ENOTEMPTY') {
+              throw err;
             }
           }
-        },
+        }
       },
-    }
-  );
+    },
+  };
+
+  // pick the operations to run for the given mode
+  // and wrap the testing environment
+  attachLifecycleOperations(modeLifecycles[mode]);
 }
 
 module.exports = createNockFixturesTestWrapper;
