@@ -6,7 +6,7 @@ const {
   unlinkSync,
   rmdirSync,
 } = require('fs');
-const { without } = require('lodash');
+const { has, without, uniq } = require('lodash');
 const mkdirp = require('mkdirp'); // eslint-disable-line import/no-extraneous-dependencies
 const nock = require('nock'); // eslint-disable-line import/no-extraneous-dependencies
 const chalk = require('chalk');
@@ -70,11 +70,9 @@ function createNockFixturesTestWrapper(options = {}) {
 
   // a map to store counter for duplicated test names
   const uniqueTestNameCounters = new Map();
-  // TODO: maybe just store this globally
-  // const uniqueTestName = () => currentResult?.[SYMBOL_FOR_NOCK_FIXTURES].uniqueTestName;
-  const uniqueTestName = () =>
-    currentResult
-      ? currentResult[SYMBOL_FOR_NOCK_FIXTURES].uniqueTestName
+  const uniqueTestName = (result = currentResult) =>
+    result
+      ? result[SYMBOL_FOR_NOCK_FIXTURES].uniqueTestName
       : null;
 
   // keeping track of unmatched requests when not recording
@@ -97,6 +95,7 @@ function createNockFixturesTestWrapper(options = {}) {
       str,
     ].join(' ');
   // utility for logging user messages
+  // eslint-disable-next-line no-console
   const print = str => console.log(message(str));
 
   // "wild" mode allows all http requests, records none, plays back none
@@ -123,19 +122,20 @@ function createNockFixturesTestWrapper(options = {}) {
       const ct = (uniqueTestNameCounters.get(testName) || 0) + 1;
       uniqueTestNameCounters.set(testName, ct);
       // store the uniqueTestName on the jasmine result object
+      // eslint-disable-next-line no-param-reassign
       result[SYMBOL_FOR_NOCK_FIXTURES] = {
         uniqueTestName: `${testName} ${ct}`,
       };
 
       currentResult = result;
     },
-    specDone: result => {
+    specDone: () => {
       currentResult = null;
     },
   });
 
   (function(lifecycles) {
-    if (!lifecycles[mode]) {
+    if (!has(lifecycles, mode)) {
       throw new Error(
         message(
           `unrecognized mode: ${JSON.stringify(
@@ -278,7 +278,7 @@ function createNockFixturesTestWrapper(options = {}) {
             fixture[uniqueTestName()] = recordings;
             // message what happened
             print(yellow(`Recorded requests: ${recordings.length}`));
-          } else if (fixture.hasOwnProperty(uniqueTestName())) {
+          } else if (has(fixture, uniqueTestName())) {
             delete fixture[uniqueTestName()];
           }
         },
@@ -286,9 +286,7 @@ function createNockFixturesTestWrapper(options = {}) {
           // when tests are *deleted*, remove the associated fixture
           without(
             Object.keys(fixture),
-            ...allJasmineTestResults.map(
-              result => result[SYMBOL_FOR_NOCK_FIXTURES].uniqueTestName
-            )
+            ...allJasmineTestResults.map(result => uniqueTestName(result))
           ).forEach(name => {
             delete fixture[name];
             print(yellow(`Removed obsolete fixture entry for ${name}`));
@@ -299,9 +297,10 @@ function createNockFixturesTestWrapper(options = {}) {
             mkdirp.sync(fixtureDir());
             // sort the fixture entries by the order in which they were encountered
             const sortedFixture = allJasmineTestResults.reduce(
-              (memo, { [SYMBOL_FOR_NOCK_FIXTURES]: { uniqueTestName } }) => {
-                if (fixture[uniqueTestName]) {
-                  memo[uniqueTestName] = fixture[uniqueTestName];
+              (memo, result) => {
+                const name = uniqueTestName(result);
+                if (has(fixture, name)) {
+                  memo[name] = fixture[name];
                 }
                 return memo;
               },
