@@ -10,7 +10,7 @@ const { has, without } = require('lodash');
 const mkdirp = require('mkdirp'); // eslint-disable-line import/no-extraneous-dependencies
 const nock = require('nock'); // eslint-disable-line import/no-extraneous-dependencies
 const chalk = require('chalk');
-const { MODE: MODES } = require('./mode');
+const { MODES } = require('./mode');
 
 const { yellow, red, cyan, grey } = chalk;
 
@@ -28,15 +28,8 @@ const SYMBOL_FOR_NOCK_FIXTURES = Symbol('nock-fixtures');
 // https://github.com/nock/nock#events
 const NOCK_NO_MATCH_EVENT = 'no match';
 
-// TODO, will this lint?
-// TODO: expect comes from global
-// TODO: reuse getJestGlobalState from jest-nock-fixtures file
-// const getCurrentTestName = () => expect.getState().currentTestName;
-// const getTestPath = () => expect.getState().testPath;
-
 function createNockFixturesTestWrapper(options = {}) {
   const {
-    jasmine,
     fixtureFolderName = '__nocks__',
     // by default this is passed the `fixtureFolderName` supplied above
     getFixtureFolderName = folderName => folderName,
@@ -45,8 +38,9 @@ function createNockFixturesTestWrapper(options = {}) {
         'createNockFixturesTestWrapper: options.getTestPath must be a function'
       );
     },
-    mode = MODES.DRYRUN,
+    jasmine,
     logNamePrefix = 'createNockFixturesTestWrapper',
+    mode = MODES.DRYRUN,
     unmatchedErrorMessage = (unmatchedRequests, { fixtureFilepath }) =>
       `unmatched requests not allowed (found ${
         unmatchedRequests.length
@@ -70,8 +64,8 @@ function createNockFixturesTestWrapper(options = {}) {
 
   // a map to store counter for duplicated test names
   const uniqueTestNameCounters = new Map();
-    // store the uniqueTestName on the jasmine result object
-    const addUniqueTestNameToResult = (result) => {
+  // store the uniqueTestName on the jasmine result object
+  const addUniqueTestNameToResult = result => {
     const testName = result.fullName;
     const ct = (uniqueTestNameCounters.get(testName) || 0) + 1;
     uniqueTestNameCounters.set(testName, ct);

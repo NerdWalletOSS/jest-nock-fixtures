@@ -1,6 +1,6 @@
 // TODO: EW.  All of this process.env interaction directly is disgusting
 
-const MODE = {
+const MODES = {
   DRYRUN: 'dryrun',
   LOCKDOWN: 'lockdown',
   RECORD: 'record',
@@ -20,7 +20,7 @@ function setMode(mode) {
 //   - disallow all http calls that haven't been mocked (throws errors)
 //   - will fail tests if any `unmatched` (read: unmocked) requests are initiated
 if (process.env.CI) {
-  setMode(MODE.LOCKDOWN);
+  setMode(MODES.LOCKDOWN);
 }
 
 // NOT in CI:
@@ -31,11 +31,11 @@ if (process.env.CI) {
 //   explicitly/redundantly set it here and add this comment
 //   to help expose this to anyone reading this
 if (!getMode()) {
-  setMode(MODE.DRYRUN);
+  setMode(MODES.DRYRUN);
 }
 
 module.exports = {
-  MODE,
+  MODES,
   getMode,
   setMode,
 };

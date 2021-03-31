@@ -49,9 +49,12 @@ then configure jest to activate `@nerdwallet/jest-nock-fixtures` and wrap each t
 
   // run the setup file created in the examples above
   setupFilesAfterEnv: ['<rootDir>/setupAfterEvvJestNockFixtures.js'],
-  // and ignore the folder where the fixtures are saved so they don't endlessly trigger re-runs in record mode
+  // ignore the folder where the fixtures are saved
+  // so they don't endlessly trigger re-runs in record mode
   watchPathIgnorePatterns: ['__nocks__'],
-
+  // add the watch plugin to change modes while in --watch mode
+  // press 'r' to cycle through jest modes between runs
+  watchPlugins: ['@nerdwallet/jest-nock-fixtures/JestWatchPlugin']
 }
 ```
 

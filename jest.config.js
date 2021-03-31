@@ -11,30 +11,20 @@ const BASE_CONFIG = {
   // ignore the folder where the fixtures are saved so they don't endlessly trigger re-runs in record mode
   watchPathIgnorePatterns: ['__nocks__'],
   // Indicates whether each individual test should be reported during the run
-  // verbose: true,
-  // setupFilesAfterEnv: [require.resolve('./src/SetupAfterEnv')],
-  // // ignore the folder where the fixtures are saved so they don't endlessly trigger re-runs in record mode
-  // watchPathIgnorePatterns: ['__nocks__'],
-
   verbose: false,
 };
 
 module.exports = {
-  // apply the preset
-  // TODO: preset is only the watch plugin.  only apply it here in example.
-  preset: '<rootDir>',
+  watchPlugins: ['<rootDir>/JestWatchPlugin'], // in a repo using this tool, ['@nerdwallet/jest-nock-fixtures/JestWatchPlugin']
 
   projects: [
     {
-      // apply preset in each project that needs it, .... or merge it
-      preset: '<rootDir>',
       ...BASE_CONFIG,
       displayName: 'web',
       // The test environment that will be used for testing
       testEnvironment: 'jsdom',
     },
     {
-      preset: '<rootDir>',
       ...BASE_CONFIG,
       displayName: 'other',
       // store snapshots in `__snapshots__other__` instead of `__snapshots__`

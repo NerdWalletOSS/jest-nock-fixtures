@@ -1,19 +1,7 @@
-// import { Mode, recorder } from "./index";
-
 const chalk = require('chalk');
 const ansi = require('ansi-escapes');
 const stripAnsi = require('strip-ansi');
-const { MODE, getMode, setMode } = require('./mode');
-
-console.log('JEST WATCH PLUGIN');
-
-// function getMode() {
-//   return process.env.JEST_NOCK_FIXTURES_MODE;
-// }
-
-// function setMode(mode) {
-//   process.env.JEST_NOCK_FIXTURES_MODE = mode;
-// }
+const { MODES, getMode, setMode } = require('./mode');
 
 const highlightMode = chalk.bgCyan.bold;
 
@@ -37,21 +25,26 @@ function getModeBanner({
 }
 
 class JestNockFixturesWatchPlugin {
+  // eslint-disable-next-line class-methods-use-this
   changeMode() {
-    // console.log('changeMode', getMode);
+    if (process.env.CI) {
+      return setMode(MODES.LOCKDOWN);
+    }
     switch (getMode()) {
-      case MODE.DRYRUN:
-        return setMode(MODE.LOCKDOWN);
-      case MODE.LOCKDOWN:
-        return setMode(MODE.RECORD);
-      case MODE.RECORD:
-        return setMode(MODE.WILD);
-      case MODE.WILD:
-        return setMode(MODE.DRYRUN);
+      case MODES.LOCKDOWN:
+        return setMode(MODES.RECORD);
+      case MODES.RECORD:
+        return setMode(MODES.WILD);
+      case MODES.WILD:
+        return setMode(MODES.DRYRUN);
+      case MODES.DRYRUN:
+      default:
+        return setMode(MODES.LOCKDOWN);
     }
   }
 
-  getUsageInfo(globalConfig) {
+  // eslint-disable-next-line class-methods-use-this
+  getUsageInfo() {
     return {
       key: 'r',
       prompt: `change jest-nock-fixtures mode from "${highlightMode(
@@ -66,16 +59,10 @@ class JestNockFixturesWatchPlugin {
     this.changeMode();
 
     // Scroll up so that repeated presses of `r` don't spam the console
-    // process.stdout.write(getModeBanner(50) + ansi.cursorUp(7));
     const banner = getModeBanner({ width: 36 });
     const lines = banner.split('\n').length;
 
     process.stdout.write(banner + ansi.cursorUp(lines - 1));
-
-    // Set the mode for the next test worker's process
-    // setMode(getMode());
-    // process.env.RECORDER = recorder.getMode();
-    // process.env.RECORDER = 'testGetMode';
   }
 }
 
