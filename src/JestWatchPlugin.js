@@ -1,9 +1,9 @@
-const { MODE, getMode, setMode } = require('./mode');
 // import { Mode, recorder } from "./index";
 
-const chalk = require("chalk");
-const ansi = require("ansi-escapes");
+const chalk = require('chalk');
+const ansi = require('ansi-escapes');
 const stripAnsi = require('strip-ansi');
+const { MODE, getMode, setMode } = require('./mode');
 
 console.log('JEST WATCH PLUGIN');
 
@@ -21,26 +21,20 @@ function getModeBanner({
   width = 23,
   title = `@nerdwallet/jest-nock-fixtures`,
   mode = getMode(),
-  bannerColor = chalk.bgWhite.hex("#3d4852"),
+  bannerColor = chalk.bgWhite.hex('#3d4852'),
   modeColor = highlightMode,
 }) {
-  const rows = [
-    '',
-    chalk.bold(title),
-    '',
-    mode,
-  ].map(row => {
+  const rows = ['', chalk.bold(title), '', mode].map(row => {
     const charDiff = row.length - stripAnsi(row).length;
     const rowWidth = width + charDiff;
-    return row.padStart((rowWidth + row.length) / 2).padEnd(rowWidth)
+    return row.padStart((rowWidth + row.length) / 2).padEnd(rowWidth);
   });
 
-  return '\n' + [
+  return `\n${[
     bannerColor(rows.slice(0, rows.length - 1).join('\n')),
     modeColor(rows.slice(rows.length - 1, rows.length).join('\n')),
-  ].join('\n');
+  ].join('\n')}`;
 }
-
 
 class JestNockFixturesWatchPlugin {
   changeMode() {
@@ -59,8 +53,10 @@ class JestNockFixturesWatchPlugin {
 
   getUsageInfo(globalConfig) {
     return {
-      key: "r",
-      prompt: `change jest-nock-fixtures mode from "${highlightMode(getMode())}"`,
+      key: 'r',
+      prompt: `change jest-nock-fixtures mode from "${highlightMode(
+        getMode()
+      )}"`,
     };
   }
 
@@ -81,6 +77,6 @@ class JestNockFixturesWatchPlugin {
     // process.env.RECORDER = recorder.getMode();
     // process.env.RECORDER = 'testGetMode';
   }
-};
+}
 
 module.exports = JestNockFixturesWatchPlugin;

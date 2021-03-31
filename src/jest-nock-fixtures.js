@@ -79,8 +79,8 @@ module.exports = function createJestNockFixturesTestWrapper(options) {
   console.log('createJestNockFixturesTestWrapper', {
     mode,
     getMode: getMode(),
-    env: process.env.JEST_NOCK_FIXTURES_MODE
-  })
+    env: process.env.JEST_NOCK_FIXTURES_MODE,
+  });
 
   return createNockFixturesTestWrapper({
     mode,

@@ -1,15 +1,22 @@
 const { dirname, basename, join } = require('path');
-const { existsSync, readFileSync, writeFileSync, unlinkSync, rmdirSync } = require('fs');
+const {
+  existsSync,
+  readFileSync,
+  writeFileSync,
+  unlinkSync,
+  rmdirSync,
+} = require('fs');
 const { sortBy, without, before } = require('lodash');
 const mkdirp = require('mkdirp'); // eslint-disable-line import/no-extraneous-dependencies
 const nock = require('nock'); // eslint-disable-line import/no-extraneous-dependencies
-const chalk = require("chalk");
+const chalk = require('chalk');
 const { MODE: MODES } = require('./mode');
+
 const { yellow, red, blue } = chalk;
 
 const { pendingMocks, activeMocks } = nock;
 
-const SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT = Symbol('jest-nock-fixtures-result');
+const SYMBOL_FOR_NOCK_FIXTURES = Symbol('nock-fixtures');
 
 // // TODO:  there is a ./mode file now.  use that.
 // const MODES = {
@@ -56,7 +63,6 @@ function createNockFixturesTestWrapper(options = {}) {
     addReporter,
   } = jasmine.getEnv();
 
-
   // let uniqueTestName;
   // TODO: better comment
 
@@ -73,7 +79,11 @@ function createNockFixturesTestWrapper(options = {}) {
   const fixtureFilepath = () => join(fixtureDir(), fixtureFilename());
 
   // TODO: maybe just store this globally
-  const uniqueTestName = () => currentResult?.[SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT].uniqueTestName;
+  // const uniqueTestName = () => currentResult?.[SYMBOL_FOR_NOCK_FIXTURES].uniqueTestName;
+  const uniqueTestName = () =>
+    currentResult
+      ? currentResult[SYMBOL_FOR_NOCK_FIXTURES].uniqueTestName
+      : null;
 
   const allTests = [];
 
@@ -81,27 +91,26 @@ function createNockFixturesTestWrapper(options = {}) {
   // is used to provide hints that fixtures need to be recorded
   // and to fail the tests in 'lockdown' mode (most useful in CI)
   let unmatched = [];
-  const handleUnmatchedRequest = req => {
-    print(yellow.bold('HANDLE UNMATCHED'));
-    unmatched.push(req);
-  }
+  const handleUnmatchedRequest = req => unmatched.push(req);
 
   // utility for creating user messages
-  const message = (str) => 
+  const message = str =>
     // `${chalk.cyan(`${logNamePrefix}`)}: ${chalk.yellow(`${mode}`)}: ${str}`;
-    ([
-      [
+    [
+      `${[
         chalk.cyan(`${logNamePrefix}`),
         chalk.yellow(`${mode}`),
         uniqueTestName() && chalk.grey(`${uniqueTestName()}`),
-      ].filter(Boolean).join(': ') + ': ',
-      str
-    ]).join(' ');
+      ]
+        .filter(Boolean)
+        .join(': ')}: `,
+      str,
+    ].join(' ');
   // utility for logging user messages
-  const print = (str) => console.log(message(str));
+  const print = str => console.log(message(str));
 
   if (mode === MODES.WILD) {
-    print('Not intercepting any requests in \'wild\' mode');
+    print("Not intercepting any requests in 'wild' mode");
     return;
   }
 
@@ -111,9 +120,9 @@ function createNockFixturesTestWrapper(options = {}) {
       // TODO: comment about the setting of a uniqueTestName (names can be duplicated)
       const testName = result.fullName;
       const ct = (uniqueTestNameCounters.get(testName) || 0) + 1;
-      uniqueTestNameCounters.set(testName, ct);  
+      uniqueTestNameCounters.set(testName, ct);
       // store the uniqueTestName on the jasmine result object
-      result[SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT] = {
+      result[SYMBOL_FOR_NOCK_FIXTURES] = {
         uniqueTestName: `${testName} ${ct}`,
       };
 
@@ -124,10 +133,17 @@ function createNockFixturesTestWrapper(options = {}) {
     },
   });
 
-
-  (function (lifecycles) {
+  (function(lifecycles) {
     if (!lifecycles[mode]) {
-      throw new Error(message(`unrecognized mode: ${JSON.stringify(mode)}. Mode must be one of the following: ${Object.values(MODES).join(', ')}`))
+      throw new Error(
+        message(
+          `unrecognized mode: ${JSON.stringify(
+            mode
+          )}. Mode must be one of the following: ${Object.values(MODES).join(
+            ', '
+          )}`
+        )
+      );
     }
 
     beforeAll(() => {
@@ -135,10 +151,16 @@ function createNockFixturesTestWrapper(options = {}) {
       try {
         fixture = JSON.parse(readFileSync(fixtureFilepath()));
         print(yellow(`loaded nock fixture file: ${fixtureFilepath()}`));
-      } catch(err) {
+      } catch (err) {
         fixture = {};
         if (err.code !== 'ENOENT') {
-          print(red(`Error parsing fixture file:\nFile:\n\t${fixtureFilepath()}\nError message:\n\t${err.message}`));
+          print(
+            red(
+              `Error parsing fixture file:\nFile:\n\t${fixtureFilepath()}\nError message:\n\t${
+                err.message
+              }`
+            )
+          );
         }
       }
     });
@@ -180,7 +202,6 @@ function createNockFixturesTestWrapper(options = {}) {
 
       lifecycles[mode].cleanup();
     });
-
   })({
     [MODES.DRYRUN]: {
       apply() {
@@ -190,16 +211,18 @@ function createNockFixturesTestWrapper(options = {}) {
         const recordings = fixture[uniqueTestName()] || [];
         print('recordings', recordings.length);
         nock.define(recordings);
-        print(yellow(`Defined (${recordings.length}) request mocks for '${uniqueTestName()}'`));  
+        print(
+          yellow(
+            `Defined (${
+              recordings.length
+            }) request mocks for '${uniqueTestName()}'`
+          )
+        );
       },
       finish() {
         // report about unmatched requests
         if (unmatched.length) {
-          print(
-            yellow(
-              `${unmatched.length} unmatched requests`
-            )
-          );
+          print(yellow(`${unmatched.length} unmatched requests`));
         }
       },
       cleanup() {},
@@ -212,7 +235,13 @@ function createNockFixturesTestWrapper(options = {}) {
         // define mocks from previously recorded fixture
         const recordings = fixture[uniqueTestName()] || [];
         nock.define(recordings);
-        print(yellow(`Defined (${recordings.length}) request mocks for '${uniqueTestName()}'`));
+        print(
+          yellow(
+            `Defined (${
+              recordings.length
+            }) request mocks for '${uniqueTestName()}'`
+          )
+        );
       },
       finish() {
         // error on unmatched requests
@@ -223,7 +252,7 @@ function createNockFixturesTestWrapper(options = {}) {
                 fixtureFilepath: fixtureFilepath(),
               })}`
             )
-          )
+          );
         }
       },
       cleanup() {},
@@ -236,7 +265,7 @@ function createNockFixturesTestWrapper(options = {}) {
         });
       },
       finish() {
-        let recordings = nock.recorder.play();
+        const recordings = nock.recorder.play();
         print(yellow('recordings.length', recordings.length));
         nock.recorder.clear();
 
@@ -253,7 +282,7 @@ function createNockFixturesTestWrapper(options = {}) {
         without(
           Object.keys(fixture),
           ...allTests.map(
-            (result) => result[SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT].uniqueTestName,
+            result => result[SYMBOL_FOR_NOCK_FIXTURES].uniqueTestName
           )
         ).forEach(name => {
           delete fixture[name];
@@ -265,7 +294,7 @@ function createNockFixturesTestWrapper(options = {}) {
           mkdirp.sync(fixtureDir());
           // sort the fixture entries by the order in which they were encountered
           const sortedFixture = allTests.reduce(
-            (memo, { [SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT]: { uniqueTestName }}) => {
+            (memo, { [SYMBOL_FOR_NOCK_FIXTURES]: { uniqueTestName } }) => {
               if (fixture[uniqueTestName]) {
                 memo[uniqueTestName] = fixture[uniqueTestName];
               }
@@ -274,9 +303,14 @@ function createNockFixturesTestWrapper(options = {}) {
             {}
           );
           // write the fixture file
-          writeFileSync(fixtureFilepath(), JSON.stringify(sortedFixture, null, 2));
+          writeFileSync(
+            fixtureFilepath(),
+            JSON.stringify(sortedFixture, null, 2)
+          );
           // message what happened
-          print(yellow(`Wrote recordings to fixture file: ${fixtureFilepath()}`));
+          print(
+            yellow(`Wrote recordings to fixture file: ${fixtureFilepath()}`)
+          );
         } else if (existsSync(fixtureFilepath())) {
           // cleanup obsolete nock fixture file and dir if they exist
           print(yellow(`Nothing recorded, removing ${fixtureFilepath()}`));
@@ -286,7 +320,11 @@ function createNockFixturesTestWrapper(options = {}) {
           try {
             rmdirSync(fixtureDir());
             // message what happened
-            print(yellow(`Removed ${fixtureDir()} directory because no fixtures were left.`));
+            print(
+              yellow(
+                `Removed ${fixtureDir()} directory because no fixtures were left.`
+              )
+            );
           } catch (err) {
             if (err.code !== 'ENOTEMPTY') {
               throw err;
