@@ -70,6 +70,17 @@ function createNockFixturesTestWrapper(options = {}) {
 
   // a map to store counter for duplicated test names
   const uniqueTestNameCounters = new Map();
+    // store the uniqueTestName on the jasmine result object
+    const addUniqueTestNameToResult = (result) => {
+    const testName = result.fullName;
+    const ct = (uniqueTestNameCounters.get(testName) || 0) + 1;
+    uniqueTestNameCounters.set(testName, ct);
+    // eslint-disable-next-line no-param-reassign
+    result[SYMBOL_FOR_NOCK_FIXTURES] = {
+      uniqueTestName: `${testName} ${ct}`,
+    };
+  };
+  // reads the appended uniqueTestName from jasmine result object
   const uniqueTestName = (result = currentResult) =>
     result ? result[SYMBOL_FOR_NOCK_FIXTURES].uniqueTestName : null;
 
@@ -81,7 +92,6 @@ function createNockFixturesTestWrapper(options = {}) {
 
   // utility for creating user messages
   const message = str =>
-    // `${chalk.cyan(`${logNamePrefix}`)}: ${chalk.yellow(`${mode}`)}: ${str}`;
     [
       `${[
         cyan(`${logNamePrefix}`),
@@ -118,18 +128,9 @@ function createNockFixturesTestWrapper(options = {}) {
   // add reporter to jasmine environment to track tests as they are run
   jasmine.getEnv().addReporter({
     specStarted: result => {
-      allJasmineTestResults.push(result);
-      // TODO: comment about the setting of a uniqueTestName (names can be duplicated)
-      const testName = result.fullName;
-      const ct = (uniqueTestNameCounters.get(testName) || 0) + 1;
-      uniqueTestNameCounters.set(testName, ct);
-      // store the uniqueTestName on the jasmine result object
-      // eslint-disable-next-line no-param-reassign
-      result[SYMBOL_FOR_NOCK_FIXTURES] = {
-        uniqueTestName: `${testName} ${ct}`,
-      };
-
+      addUniqueTestNameToResult(result);
       currentResult = result;
+      allJasmineTestResults.push(result);
     },
     specDone: () => {
       currentResult = null;
@@ -184,11 +185,9 @@ function createNockFixturesTestWrapper(options = {}) {
     });
 
     afterAll(() => {
-      // TODO: added this
-      // Avoid memory-leaks: https://github.com/nock/nock/issues/2057#issuecomment-666494539
-      nock.restore();
       // full cleanup
       nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+      nock.restore(); // Avoid memory-leaks: https://github.com/nock/nock/issues/2057#issuecomment-666494539
       nock.cleanAll();
       nock.enableNetConnect();
 
