@@ -26,7 +26,7 @@ const NOCK_NO_MATCH_EVENT = 'no match';
 // TODO, will this lint?
 // TODO: expect comes from global
 // TODO: reuse getJestGlobalState from jest-nock-fixtures file
-const getCurrentTestName = () => expect.getState().currentTestName;
+// const getCurrentTestName = () => expect.getState().currentTestName;
 // const getTestPath = () => expect.getState().testPath;
 
 function createNockFixturesTestWrapper(options = {}) {
@@ -57,35 +57,12 @@ function createNockFixturesTestWrapper(options = {}) {
   } = jasmine.getEnv();
 
 
-  // let fixture;
-
-  // // https://github.com/nock/nock/issues/2057#issuecomment-666494539
-  // beforeEach(() => nock.cleanAll()) // Removes mocks between unit tests so they run in isolation
-
-  // afterAll(() => { // Run every time all the tests of a file have finished running
-  //     nock.restore(); // Avoids memory-leaks
-  // });
-  
-  // beforeAll(() => {
-  //   if (!nock.isActive()) {
-  //     nock.activate();
-  //     // nock.enableNetConnect();
-  //   }
-  //     // nock.activate();
-  //     // nock.enableNetConnect();
-  // });
-
-  // const originalConsoleLog = console.log;
-  // console.log = console.warn = console.error = () => {};
-  console.log('getEnv', jasmine.getEnv());
-
   // let uniqueTestName;
   // TODO: better comment
 
   // a map to store counter for duplicated test names
   const uniqueTestNameCounters = new Map();
-  // const captured = {};
-  // const fixture = {};
+  // holds recorded data from/for the fixture file on disk
   let fixture;
 
   let currentResult;
@@ -129,16 +106,7 @@ function createNockFixturesTestWrapper(options = {}) {
   }
 
   addReporter({
-    jasmineStarted: (...args) => {
-      // // load pre-recorded fixture file if it exists
-      // if (existsSync(fixtureFilepath())) {
-      //   const fixtureData = JSON.parse(readFileSync(fixtureFilepath()));
-      //   Object.assign(fixture, fixtureData);
-      //   print(yellow(`loaded nock fixture file: ${fixtureFilepath()}`));        
-      // }
-    },
     specStarted: result => {
-      // console.log('specStarted', result)
       allTests.push(result);
       // TODO: comment about the setting of a uniqueTestName (names can be duplicated)
       const testName = result.fullName;
@@ -150,26 +118,18 @@ function createNockFixturesTestWrapper(options = {}) {
       };
 
       currentResult = result;
-
-      // // track requests that were not mocked
-      // unmatched = [];
-      // nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-      // nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-
-      // TODO: namespace this
     },
     specDone: result => {
-      // console.log('specDone', result);
-
-    },
-    jasmineDone: (...args) => {
       currentResult = null;
-      // lifecycles[mode].cleanup();
-    }
+    },
   });
 
 
   (function (lifecycles) {
+    if (!lifecycles[mode]) {
+      throw new Error(message(`unrecognized mode: ${JSON.stringify(mode)}. Mode must be one of the following: ${Object.values(MODES).join(', ')}`))
+    }
+
     beforeAll(() => {
       // load pre-recorded fixture file if it exists
       try {
@@ -186,6 +146,7 @@ function createNockFixturesTestWrapper(options = {}) {
     beforeEach(() => {
       print('beforeEach start');
       // Remove mocks between unit tests so they run in isolation
+      // https://github.com/nock/nock/issues/2057#issuecomment-666494539
       nock.cleanAll();
       // Prevent memory leaks and
       // ensure that previous recorder session is cleared when in 'record' mode
@@ -200,13 +161,8 @@ function createNockFixturesTestWrapper(options = {}) {
       nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
       nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
 
-          // // track requests that were not mocked
-          // nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-          // nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-
       print('beforeEach apply');
       lifecycles[mode].apply();
-
     });
 
     afterEach(() => {
@@ -214,15 +170,11 @@ function createNockFixturesTestWrapper(options = {}) {
     });
 
     afterAll(() => {
-      const { uniqueTestName } = currentResult[SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT];
-      const cachedUnmatched = unmatched;
-
       // TODO: added this
       // Avoid memory-leaks: https://github.com/nock/nock/issues/2057#issuecomment-666494539
       nock.restore();
       // full cleanup
       nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-      // unmatched = [];
       nock.cleanAll();
       nock.enableNetConnect();
 
@@ -234,15 +186,11 @@ function createNockFixturesTestWrapper(options = {}) {
       apply() {
         // explicitly enableNetConnect for dry-run
         nock.enableNetConnect();
-
         // define mocks from previously recorded fixture
         const recordings = fixture[uniqueTestName()] || [];
         print('recordings', recordings.length);
         nock.define(recordings);
         print(yellow(`Defined (${recordings.length}) request mocks for '${uniqueTestName()}'`));  
-        // // track requests that were not mocked
-        // nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-        // nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
       },
       finish() {
         // report about unmatched requests
@@ -265,9 +213,6 @@ function createNockFixturesTestWrapper(options = {}) {
         const recordings = fixture[uniqueTestName()] || [];
         nock.define(recordings);
         print(yellow(`Defined (${recordings.length}) request mocks for '${uniqueTestName()}'`));
-        // // track requests that were not mocked
-        // nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-        // nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
       },
       finish() {
         // error on unmatched requests
@@ -291,25 +236,20 @@ function createNockFixturesTestWrapper(options = {}) {
         });
       },
       finish() {
-        // TODO: nock operations should be in jasmine before/after(each/all) functions
         let recordings = nock.recorder.play();
         print(yellow('recordings.length', recordings.length));
-        // console.log('recordings', recordings);
         nock.recorder.clear();
-        // // nock.restore();
 
         if (recordings.length > 0) {
           fixture[uniqueTestName()] = recordings;
           // message what happened
           print(yellow(`Recorded requests: ${recordings.length}`));
         } else if (fixture.hasOwnProperty(uniqueTestName())) {
-          // console.log(red('TODO: cleanup fixtures.hasOwnProperty(uniqueTestName)', uniqueTestName));
           delete fixture[uniqueTestName()];
         }
       },
       cleanup() {
         // when tests are *deleted*, remove the associated fixture
-        // TODO: do this in after all
         without(
           Object.keys(fixture),
           ...allTests.map(
@@ -321,18 +261,8 @@ function createNockFixturesTestWrapper(options = {}) {
         });
 
         if (Object.keys(fixture).length) {
-          // console.log(yellow('WRITING'));
           // ensure fixtures folder exists
           mkdirp.sync(fixtureDir());
-          // sort it
-          // recording = sortBy(recording, ['status', 'scope', 'method', 'path', 'body']); // eslint-disable-line prettier/prettier
-          // const fixture = existsSync(fixtureFilepath()) ? require(fixtureFilepath()) : {};
-          // write it
-          // writeFileSync(fixtureFilepath(), JSON.stringify(recording, null, 4));
-          // merge keys in place
-          // Object.keys(captured).forEach(
-          //   (name) => { fixture[name] = captured[name]; },
-          // );
           // sort the fixture entries by the order in which they were encountered
           const sortedFixture = allTests.reduce(
             (memo, { [SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT]: { uniqueTestName }}) => {
@@ -343,29 +273,20 @@ function createNockFixturesTestWrapper(options = {}) {
             },
             {}
           );
-          // const fixture = Object.assign({}, existingFixture, captured);
+          // write the fixture file
           writeFileSync(fixtureFilepath(), JSON.stringify(sortedFixture, null, 2));
           // message what happened
-          print( // eslint-disable-line no-console,prettier/prettier
-            yellow(
-              // `${logNamePrefix}: ${mode}: Recorded requests: ${recording.length}`
-              `TODO: MESSAGE ABOUT FILE WRITTEN`
-            )
-          );
+          print(yellow(`Wrote recordings to fixture file: ${fixtureFilepath()}`));
         } else if (existsSync(fixtureFilepath())) {
           // cleanup obsolete nock fixture file and dir if they exist
-          print(yellow(`Nothing recorded, cleaning up ${fixtureFilepath()}.`));
-          console.log(red('TODO: CLEANUP', uniqueTestName));
+          print(yellow(`Nothing recorded, removing ${fixtureFilepath()}`));
           // remove the fixture file
           unlinkSync(fixtureFilepath());
           // remove the directory if not empty
           try {
             rmdirSync(fixtureDir());
             // message what happened
-            print(yellow(`Cleaned up ${fixtureDir()} because no fixtures were left.`));
-            // console.warn( // eslint-disable-line no-console,prettier/prettier
-            //   `${logNamePrefix}: ${mode}: Cleaned up ${fixtureDir()} because no fixtures were left.`
-            // );
+            print(yellow(`Removed ${fixtureDir()} directory because no fixtures were left.`));
           } catch (err) {
             if (err.code !== 'ENOTEMPTY') {
               throw err;
