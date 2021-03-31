@@ -4,20 +4,21 @@ const { sortBy, without, before } = require('lodash');
 const mkdirp = require('mkdirp'); // eslint-disable-line import/no-extraneous-dependencies
 const nock = require('nock'); // eslint-disable-line import/no-extraneous-dependencies
 const chalk = require("chalk");
-const { MODE: { DRYRUN, LOCKDOWN, RECORD, WILD } } = require('./mode');
+const { MODE: MODES } = require('./mode');
 const { yellow, red, blue } = chalk;
 
 const { pendingMocks, activeMocks } = nock;
 
 const SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT = Symbol('jest-nock-fixtures-result');
 
-// TODO:  there is a ./mode file now.  use that.
-const MODES = {
-  DRYRUN: 'dryrun',
-  LOCKDOWN: 'lockdown',
-  RECORD: 'record',
-  WILD: 'wild',
-};
+// // TODO:  there is a ./mode file now.  use that.
+// const MODES = {
+//   DRYRUN: 'dryrun',
+//   LOCKDOWN: 'lockdown',
+//   RECORD: 'record',
+//   WILD: 'wild',
+// };
+// const { DRYRUN, LOCKDOWN, RECORD, WILD } = MODES;
 
 // https://github.com/nock/nock#events
 const NOCK_NO_MATCH_EVENT = 'no match';
@@ -83,7 +84,7 @@ function createNockFixturesTestWrapper(options = {}) {
 
   // a map to store counter for duplicated test names
   const uniqueTestNameCounters = new Map();
-  const captured = {};
+  // const captured = {};
   // const fixture = {};
   let fixture;
 
@@ -122,7 +123,7 @@ function createNockFixturesTestWrapper(options = {}) {
   // utility for logging user messages
   const print = (str) => console.log(message(str));
 
-  if (mode === WILD) {
+  if (mode === MODES.WILD) {
     print('Not intercepting any requests in \'wild\' mode');
     return;
   }
@@ -229,7 +230,7 @@ function createNockFixturesTestWrapper(options = {}) {
     });
 
   })({
-    [DRYRUN]: {
+    [MODES.DRYRUN]: {
       apply() {
         // explicitly enableNetConnect for dry-run
         nock.enableNetConnect();
@@ -255,7 +256,7 @@ function createNockFixturesTestWrapper(options = {}) {
       },
       cleanup() {},
     },
-    [LOCKDOWN]: {
+    [MODES.LOCKDOWN]: {
       apply() {
         // http requests are NOT ALLOWED in 'lockdown' mode
         nock.disableNetConnect();
@@ -282,7 +283,7 @@ function createNockFixturesTestWrapper(options = {}) {
       },
       cleanup() {},
     },
-    [RECORD]: {
+    [MODES.RECORD]: {
       apply() {
         nock.recorder.rec({
           dont_print: true,
@@ -298,7 +299,7 @@ function createNockFixturesTestWrapper(options = {}) {
         // // nock.restore();
 
         if (recordings.length > 0) {
-          captured[uniqueTestName()] = recordings;
+          fixture[uniqueTestName()] = recordings;
           // message what happened
           print(yellow(`Recorded requests: ${recordings.length}`));
         } else if (fixture.hasOwnProperty(uniqueTestName())) {
@@ -319,7 +320,7 @@ function createNockFixturesTestWrapper(options = {}) {
           print(yellow(`Removed obsolete fixture entry for ${name}`));
         });
 
-        if (Object.keys(captured).length) {
+        if (Object.keys(fixture).length) {
           // console.log(yellow('WRITING'));
           // ensure fixtures folder exists
           mkdirp.sync(fixtureDir());
@@ -329,9 +330,9 @@ function createNockFixturesTestWrapper(options = {}) {
           // write it
           // writeFileSync(fixtureFilepath(), JSON.stringify(recording, null, 4));
           // merge keys in place
-          Object.keys(captured).forEach(
-            (name) => { fixture[name] = captured[name]; },
-          );
+          // Object.keys(captured).forEach(
+          //   (name) => { fixture[name] = captured[name]; },
+          // );
           // sort the fixture entries by the order in which they were encountered
           const sortedFixture = allTests.reduce(
             (memo, { [SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT]: { uniqueTestName }}) => {
@@ -351,12 +352,6 @@ function createNockFixturesTestWrapper(options = {}) {
               `TODO: MESSAGE ABOUT FILE WRITTEN`
             )
           );
-        // } else if (fixture.hasOwnProperty(uniqueTestName)) {
-        //   console.error('TODO: fixtures.hasOwnProperty(uniqueTestName)', uniqueTestName);
-        //   if (isRecordingMode()) {
-        //     delete fixture[uniqueTestName];
-        //   }
-        // }
         } else if (existsSync(fixtureFilepath())) {
           // cleanup obsolete nock fixture file and dir if they exist
           print(yellow(`Nothing recorded, cleaning up ${fixtureFilepath()}.`));
@@ -372,7 +367,9 @@ function createNockFixturesTestWrapper(options = {}) {
             //   `${logNamePrefix}: ${mode}: Cleaned up ${fixtureDir()} because no fixtures were left.`
             // );
           } catch (err) {
-            if (err.code !== 'ENOTEMPTY') throw err;
+            if (err.code !== 'ENOTEMPTY') {
+              throw err;
+            }
           }
         }
       },

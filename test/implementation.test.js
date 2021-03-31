@@ -16,7 +16,7 @@ describe('implementation', () => {
     await res.json();
   });
 
-  it('Hi here is another', async () => {
+  it.skip('Hi here is another', async () => {
     // const res = await fetch('http://worldclockapi.com/api/json/est/now');
     const res = await fetch('https://jsonplaceholder.typicode.com/todos/1');
     // https://jsonplaceholder.typicode.com/todos/1
