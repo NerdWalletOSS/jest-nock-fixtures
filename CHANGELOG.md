@@ -1,3 +1,11 @@
+## 2.0.0 (2021-03-31) benjroy
+
+- BREAKING: changed chape of fixture file to store recordings per test.
+  - allows better cleanup and cleaner diffs
+  - fixtures must be re-recorded after updating
+- FEAT: adds JestWatchPlugin
+  - when jest is configured to use this watch plugin (see README), `mode` can be changed on the fly by pressing `'r'` when running `jest --watch ...`
+
 ## 1.1.1 (2021-03-23) benjroy
 
 - run `npm update` and `npm audit fix` to clear security warning from dependencies
