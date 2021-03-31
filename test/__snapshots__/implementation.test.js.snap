@@ -28,6 +28,34 @@ Object {
 }
 `;
 
+exports[`implementation AND YET here is another 3`] = `
+Object {
+  "$id": "1",
+  "currentDateTime": "2021-03-31T14:48-04:00",
+  "currentFileTime": 132616756992217540,
+  "dayOfTheWeek": "Wednesday",
+  "isDayLightSavingsTime": true,
+  "ordinalDate": "2021-90",
+  "serviceResponse": null,
+  "timeZoneName": "Eastern Standard Time",
+  "utcOffset": "-04:00:00",
+}
+`;
+
+exports[`implementation AND YET here is another 4`] = `
+Object {
+  "$id": "1",
+  "currentDateTime": "2021-03-31T14:48-04:00",
+  "currentFileTime": 132616756992373810,
+  "dayOfTheWeek": "Wednesday",
+  "isDayLightSavingsTime": true,
+  "ordinalDate": "2021-90",
+  "serviceResponse": null,
+  "timeZoneName": "Eastern Standard Time",
+  "utcOffset": "-04:00:00",
+}
+`;
+
 exports[`implementation AND here is another 1`] = `
 Object {
   "completed": false,

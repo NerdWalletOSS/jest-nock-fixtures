@@ -84,7 +84,8 @@ function createNockFixturesTestWrapper(options = {}) {
   // a map to store counter for duplicated test names
   const uniqueTestNameCounters = new Map();
   const captured = {};
-  const fixture = {};
+  // const fixture = {};
+  let fixture;
 
   let currentResult;
 
@@ -128,12 +129,12 @@ function createNockFixturesTestWrapper(options = {}) {
 
   addReporter({
     jasmineStarted: (...args) => {
-      // load pre-recorded fixture file if it exists
-      if (existsSync(fixtureFilepath())) {
-        const fixtureData = JSON.parse(readFileSync(fixtureFilepath()));
-        Object.assign(fixture, fixtureData);
-        print(yellow(`loaded nock fixture file: ${fixtureFilepath()}`));        
-      }
+      // // load pre-recorded fixture file if it exists
+      // if (existsSync(fixtureFilepath())) {
+      //   const fixtureData = JSON.parse(readFileSync(fixtureFilepath()));
+      //   Object.assign(fixture, fixtureData);
+      //   print(yellow(`loaded nock fixture file: ${fixtureFilepath()}`));        
+      // }
     },
     specStarted: result => {
       // console.log('specStarted', result)
@@ -162,11 +163,72 @@ function createNockFixturesTestWrapper(options = {}) {
     },
     jasmineDone: (...args) => {
       currentResult = null;
-      lifecycles[mode].cleanup();
+      // lifecycles[mode].cleanup();
     }
   });
 
-  const lifecycles = {
+
+  (function (lifecycles) {
+    beforeAll(() => {
+      // load pre-recorded fixture file if it exists
+      try {
+        fixture = JSON.parse(readFileSync(fixtureFilepath()));
+        print(yellow(`loaded nock fixture file: ${fixtureFilepath()}`));
+      } catch(err) {
+        fixture = {};
+        if (err.code !== 'ENOENT') {
+          print(red(`Error parsing fixture file:\nFile:\n\t${fixtureFilepath()}\nError message:\n\t${err.message}`));
+        }
+      }
+    });
+
+    beforeEach(() => {
+      print('beforeEach start');
+      // Remove mocks between unit tests so they run in isolation
+      nock.cleanAll();
+      // Prevent memory leaks and
+      // ensure that previous recorder session is cleared when in 'record' mode
+      nock.restore();
+
+      if (!nock.isActive()) {
+        nock.activate();
+      }
+
+      // track requests that were not mocked
+      unmatched = [];
+      nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+      nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+
+          // // track requests that were not mocked
+          // nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+          // nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+
+      print('beforeEach apply');
+      lifecycles[mode].apply();
+
+    });
+
+    afterEach(() => {
+      lifecycles[mode].finish();
+    });
+
+    afterAll(() => {
+      const { uniqueTestName } = currentResult[SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT];
+      const cachedUnmatched = unmatched;
+
+      // TODO: added this
+      // Avoid memory-leaks: https://github.com/nock/nock/issues/2057#issuecomment-666494539
+      nock.restore();
+      // full cleanup
+      nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
+      // unmatched = [];
+      nock.cleanAll();
+      nock.enableNetConnect();
+
+      lifecycles[mode].cleanup();
+    });
+
+  })({
     [DRYRUN]: {
       apply() {
         // explicitly enableNetConnect for dry-run
@@ -315,56 +377,6 @@ function createNockFixturesTestWrapper(options = {}) {
         }
       },
     },
-  };
-
-  // beforeAll(() => {
-  //   if (!nock.isActive()) {
-  //     nock.activate();
-  //   }
-  // })
-
-  beforeEach(() => {
-    print('beforeEach start');
-    // Remove mocks between unit tests so they run in isolation
-    nock.cleanAll();
-    // Prevent memory leaks and
-    // ensure that previous recorder session is cleared when in 'record' mode
-    nock.restore();
-
-    if (!nock.isActive()) {
-      nock.activate();
-    }
-
-    // track requests that were not mocked
-    unmatched = [];
-    nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-    nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-
-        // // track requests that were not mocked
-        // nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-        // nock.emitter.on(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-
-    print('beforeEach apply');
-    lifecycles[mode].apply();
-
-  });
-
-  afterEach(() => {
-    lifecycles[mode].finish();
-  });
-
-  afterAll(() => {
-    const { uniqueTestName } = currentResult[SYMBOL_FOR_JEST_NOCK_FIXTURES_RESULT];
-    const cachedUnmatched = unmatched;
-
-    // TODO: added this
-    // Avoid memory-leaks: https://github.com/nock/nock/issues/2057#issuecomment-666494539
-    nock.restore();
-    // full cleanup
-    nock.emitter.removeListener(NOCK_NO_MATCH_EVENT, handleUnmatchedRequest);
-    // unmatched = [];
-    nock.cleanAll();
-    nock.enableNetConnect();
   });
 }
 
