@@ -11,11 +11,12 @@ const BASE_CONFIG = {
   // ignore the folder where the fixtures are saved so they don't endlessly trigger re-runs in record mode
   watchPathIgnorePatterns: ['__nocks__'],
   // Indicates whether each individual test should be reported during the run
-  // verbose: true,
   verbose: false,
 };
 
 module.exports = {
+  watchPlugins: ['<rootDir>/JestWatchPlugin'], // in a repo using this tool, ['@nerdwallet/jest-nock-fixtures/JestWatchPlugin']
+
   projects: [
     {
       ...BASE_CONFIG,
