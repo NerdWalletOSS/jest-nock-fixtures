@@ -13,7 +13,7 @@ function getJestNockFixtureFolderName(fixtureFolderName) {
   return join(snapshotFolderName, fixtureFolderName);
 }
 
-module.exports = function createJestNockFixturesTestWrapper(options) {
+module.exports = function createJestNockFixturesTestWrapper(options = {}) {
   const {
     fixtureFolderName = '__nocks__',
     getFixtureFolderName = getJestNockFixtureFolderName,
