@@ -4,7 +4,7 @@ jest-nock-fixtures is a wrapper for a jest testing environment. It uses `nock` t
 
 ## Install
 ```
-npm install @nerdwallet/jest-nock-fixtures
+npm install -D @nerdwallet/jest-nock-fixtures
 ```
 
 ## Setup
@@ -12,11 +12,11 @@ npm install @nerdwallet/jest-nock-fixtures
 Configure `jest` to setup this wrapper before the tests in each test file are executed.  In `jest@24`, this can be achieved by configuring `setupFilesAfterEnv` (https://jestjs.io/docs/en/configuration#setupfilesafterenv-array)
 
 ---
-Create a file to import and activate `@nerdwallet/jest-nock-fixtures`, in this example named `setupAfterEvvJestNockFixtures.js`
+Create a file to import and activate `@nerdwallet/jest-nock-fixtures`, in this example named `setupAfterEnvJestNockFixtures.js`
 
 activating the test wrapper
 ```js
-/* setupAfterEvvJestNockFixtures.js */
+/* setupAfterEnvJestNockFixtures.js */
 
 const createJestNockFixturesTestWrapper = require('@nerdwallet/jest-nock-fixtures');
 
@@ -26,7 +26,7 @@ createJestNockFixturesTestWrapper();
 optionally, the error message that is thrown in `lockdown` mode can be configured.  This allows you to hint at ways to fix that might be specific to the repo `@nerdwallet/jest-nock-fixtures` is used in, ex:
 
 ```js
-/* setupAfterEvvJestNockFixtures.js */
+/* setupAfterEnvJestNockFixtures.js */
 
 const createJestNockFixturesTestWrapper = require('@nerdwallet/jest-nock-fixtures');
 
@@ -48,7 +48,7 @@ then configure jest to activate `@nerdwallet/jest-nock-fixtures` and wrap each t
   // ... the rest of the jest config
 
   // run the setup file created in the examples above
-  setupFilesAfterEnv: ['<rootDir>/setupAfterEvvJestNockFixtures.js'],
+  setupFilesAfterEnv: ['<rootDir>/setupAfterEnvJestNockFixtures.js'],
   // ignore the folder where the fixtures are saved
   // so they don't endlessly trigger re-runs in record mode
   watchPathIgnorePatterns: ['__nocks__'],
