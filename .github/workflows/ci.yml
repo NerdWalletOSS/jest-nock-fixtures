@@ -15,40 +15,40 @@ jobs:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node }}
-          cache: 'npm'
-          cache-dependency-path: subdir/package-lock.json
-      - run: echo "Node v${{ matrix.node }} has been setup."
-      - name: Get npm cache directory
-        id: npm-cache-dir
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-      - name: Cache node modules
-        id: cache-npm
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+      # - name: Setup Node.js
+      #   uses: actions/setup-node@v2
+      #   with:
+      #     node-version: ${{ matrix.node }}
+      #     cache: 'npm'
+      #     cache-dependency-path: subdir/package-lock.json
+      # - run: echo "Node v${{ matrix.node }} has been setup."
+      # - name: Get npm cache directory
+      #   id: npm-cache-dir
+      #   run: |
+      #     echo "::set-output name=dir::$(npm config get cache)"
+      # - name: Cache node modules
+      #   id: cache-npm
+      #   uses: actions/cache@v3
+      #   env:
+      #     cache-name: cache-node-modules
+      #   with:
+      #     path: ${{ steps.npm-cache-dir.outputs.dir }}
+      #     key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-build-${{ env.cache-name }}-
+      #       ${{ runner.os }}-build-
+      #       ${{ runner.os }}-
 
-      - if: ${{ steps.cache-npm.outputs.cache-hit == 'false' }}
-        name: List the state of node modules
-        continue-on-error: true
-        run: npm list
+      # - if: ${{ steps.cache-npm.outputs.cache-hit == 'false' }}
+      #   name: List the state of node modules
+      #   continue-on-error: true
+      #   run: npm list
 
-      - name: Install Dependencies
-        run: npm install
-      - name: Lint
-        run: npm lint
-      - name: Build
-        run: npm run build
-      - name: Test
-        run: npm run test
+      # - name: Install Dependencies
+      #   run: npm install
+      # - name: Lint
+      #   run: npm lint
+      # - name: Build
+      #   run: npm run build
+      # - name: Test
+      #   run: npm run test
