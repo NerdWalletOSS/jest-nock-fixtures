@@ -5,15 +5,15 @@ on:
       - master
 jobs:
   release:
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event.push.repository.full_name == github.repository
     name: Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
+          ref: ${{github.event.push.ref}}
+          repository: ${{github.event.push.repository.full_name}}
           persist-credentials: false
       - name: Setup Node.js
         uses: actions/setup-node@v2
@@ -44,4 +44,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npx -p node@v12-lts -c "npx semantic-release"
+        run: npx semantic-release
