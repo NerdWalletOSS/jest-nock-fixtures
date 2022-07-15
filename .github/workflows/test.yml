@@ -1,0 +1,17 @@
+name: Test
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['12', '14', '16']
+
+    steps:
+      - name: Checkout
+        uses: actions:checkout@v2
+      - run: echo "The ${{ github.repository }} repository has been cloned to the runner."
