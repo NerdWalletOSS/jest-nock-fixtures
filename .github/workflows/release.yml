@@ -40,7 +40,7 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - if: github.event.pull_request.head.repo.full_name == github.repository
-      - name: Release
+        name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
