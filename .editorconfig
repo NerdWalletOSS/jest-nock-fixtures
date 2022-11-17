@@ -10,13 +10,7 @@ charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 
-[*.{js,jsx,mjs}]
-indent_size = 2
-
-[*.{css,less}]
-indent_size = 2
-
-[*.json]
+[*.{js,jsx,mjs,css,less,json,yml,yaml}]
 indent_size = 2
 
 [Makefile]
