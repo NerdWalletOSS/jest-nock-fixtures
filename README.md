@@ -99,8 +99,17 @@ npm run test:record
 
 Main commands:
 
-- `npm run test`: Run unit tests and generate coverage reports
+- `yarn install`: Install all dependencies
+- `yarn test`: Run unit tests and generate coverage reports
 
 Other commands you might care about:
 
-- `npm run lint`: Run lint
+- `yarn lint`: Run lint
+- `yarn format`: Automatically fix code issues
+
+### Releasing a new version
+
+1. Update the version in `package.json`. Take care to follow semantic versioning.
+2. Update `CHANGELOG.md` to reflect the changes in the new version.
+3. Push both of the above changes to the `master` branch.
+4. Create a new release in the GitHub CI. GitHub Actions will automatically publish the new version to npm.
