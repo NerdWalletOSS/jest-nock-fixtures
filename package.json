@@ -6,13 +6,12 @@
   "main": "index.js",
   "scripts": {
     "jest": "jest --config=jest.config.js --coverage",
-    "build": "true",
-    "fix-lint": "npm run lint -- --fix",
+    "format": "yarn lint --fix",
     "lint": "eslint src --ext .js",
-    "test": "npm run jest --",
-    "test:wild": "JEST_NOCK_FIXTURES_MODE=wild npm run test --",
-    "test:record": "JEST_NOCK_FIXTURES_MODE=record npm run test --",
-    "test:lockdown": "JEST_NOCK_FIXTURES_MODE=lockdown npm run test --"
+    "test": "yarn jest --",
+    "test:wild": "JEST_NOCK_FIXTURES_MODE=wild yarn test",
+    "test:record": "JEST_NOCK_FIXTURES_MODE=record yarn test",
+    "test:lockdown": "JEST_NOCK_FIXTURES_MODE=lockdown yarn test"
   },
   "repository": {
     "type": "git",
