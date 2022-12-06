@@ -8,9 +8,10 @@
     "jest": "jest --config=jest.config.js --coverage",
     "format": "yarn lint --fix",
     "lint": "eslint src --ext .js",
-    "test": "yarn jest --",
+    "test": "yarn jest",
     "test:wild": "JEST_NOCK_FIXTURES_MODE=wild yarn test",
     "test:record": "JEST_NOCK_FIXTURES_MODE=record yarn test",
+    "test:rerecord": "JEST_NOCK_FIXTURES_MODE=rerecord yarn test",
     "test:lockdown": "JEST_NOCK_FIXTURES_MODE=lockdown yarn test"
   },
   "repository": {

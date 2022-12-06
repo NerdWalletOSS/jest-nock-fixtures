@@ -234,7 +234,7 @@ function createNockFixturesTestWrapper(options = {}) {
       },
       cleanup() {},
     },
-    [MODES.RERECORD]: {
+    [MODES.RECORD]: {
       apply() {
         const recordings = fixture[uniqueTestName()] || [];
         nock.define(recordings);
@@ -313,7 +313,7 @@ function createNockFixturesTestWrapper(options = {}) {
         }
       },
     },
-    [MODES.RECORD]: {
+    [MODES.RERECORD]: {
       apply() {
         nock.recorder.rec({
           dont_print: true,
