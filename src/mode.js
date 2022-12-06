@@ -2,6 +2,7 @@ const MODES = {
   DRYRUN: 'dryrun',
   LOCKDOWN: 'lockdown',
   RECORD: 'record',
+  RERECORD: 'rerecord',
   WILD: 'wild',
 };
 

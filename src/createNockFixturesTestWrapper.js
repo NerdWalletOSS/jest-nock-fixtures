@@ -234,6 +234,85 @@ function createNockFixturesTestWrapper(options = {}) {
       },
       cleanup() {},
     },
+    [MODES.RERECORD]: {
+      apply() {
+        const recordings = fixture[uniqueTestName()] || [];
+        nock.define(recordings);
+
+        nock.recorder.rec({
+          dont_print: true,
+          output_objects: true,
+        });
+      },
+      finish() {
+        const recordings = nock.recorder.play();
+        nock.recorder.clear();
+
+        if (recordings.length > 0) {
+          fixture[uniqueTestName()] = recordings;
+          // message what happened
+          print(yellow(`Recorded ${recordings.length} request(s)`));
+        } else if (has(fixture, uniqueTestName())) {
+          delete fixture[uniqueTestName()];
+        }
+      },
+      cleanup() {
+        // when tests are *deleted*, remove the associated fixture
+        without(
+          Object.keys(fixture),
+          ...allJasmineTestResults.map(result => uniqueTestName(result))
+        ).forEach(name => {
+          delete fixture[name];
+          print(yellow(`Removed obsolete fixture entry for ${name}`));
+        });
+
+        // Save it: write the recordings to disk
+        if (Object.keys(fixture).length) {
+          // ensure fixtures folder exists
+          mkdirp.sync(fixtureDir());
+          // sort the fixture entries by the order they were defined in the test file
+          const sortedFixture = allJasmineTestResults.reduce((memo, result) => {
+            const name = uniqueTestName(result);
+            // eslint-disable-next-line no-param-reassign
+            memo[name] = fixture[name];
+            return memo;
+          }, {});
+          // write the fixture file
+          writeFileSync(
+            fixtureFilepath(),
+            JSON.stringify(sortedFixture, null, 2)
+          );
+          // message what happened
+          print(
+            yellow(`Wrote recordings to fixture file: ${fixtureFilepath()}`)
+          );
+          return;
+        }
+
+        // Cleanup: remove previous fixture files previously written
+        // when nothing was captured in the recordings
+        if (existsSync(fixtureFilepath())) {
+          // cleanup obsolete nock fixture file and dir if they exist
+          print(yellow(`Nothing recorded, removing ${fixtureFilepath()}`));
+          // remove the fixture file
+          unlinkSync(fixtureFilepath());
+          // remove the directory if not empty
+          try {
+            rmdirSync(fixtureDir());
+            // message what happened
+            print(
+              yellow(
+                `Removed ${fixtureDir()} directory because no fixtures were left.`
+              )
+            );
+          } catch (err) {
+            if (err.code !== 'ENOTEMPTY') {
+              throw err;
+            }
+          }
+        }
+      },
+    },
     [MODES.RECORD]: {
       apply() {
         nock.recorder.rec({
