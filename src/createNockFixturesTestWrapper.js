@@ -93,7 +93,7 @@ function createNockFixturesTestWrapper(options = {}) {
   const log = str => console.log(message(str));
   const logVerbose = str => {
     if (!process.env.JEST_NOCK_FIXTURES_VERBOSE) return;
-    log(grey(str));
+    log(str);
   };
 
   // ensure a valid mode is being used
