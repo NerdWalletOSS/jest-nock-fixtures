@@ -236,15 +236,26 @@ function createNockFixturesTestWrapper(options = {}) {
     },
     [MODES.RECORD]: {
       apply() {
-        const recordings = fixture[uniqueTestName()] || [];
-        nock.define(recordings);
-
         nock.recorder.rec({
           dont_print: true,
           output_objects: true,
         });
+
+        const interceptor = nock(/.*/).persist();
+        interceptor
+          .intercept(/.*/, 'GET')
+          .reply(async function reply(uri, body, respond) {
+            console.log('intercepted uri', uri);
+          });
+
+        const recordings = fixture[uniqueTestName()] || [];
+        nock.define(recordings);
+        console.log('defined recordings', recordings);
       },
       finish() {
+        // TODO: for testing only
+        if (true) return;
+
         const recordings = nock.recorder.play();
         nock.recorder.clear();
 
