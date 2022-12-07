@@ -87,9 +87,14 @@ function createNockFixturesTestWrapper(options = {}) {
         .join(': ')}: `,
       str,
     ].join(' ');
+
   // utility for logging user messages
   // eslint-disable-next-line no-console
-  const print = str => console.log(message(str));
+  const log = str => console.log(message(str));
+  const logVerbose = str => {
+    if (!process.env.JEST_NOCK_FIXTURES_VERBOSE) return;
+    log(grey(str));
+  };
 
   // ensure a valid mode is being used
   if (!Object.values(MODES).includes(mode)) {
@@ -106,7 +111,7 @@ function createNockFixturesTestWrapper(options = {}) {
 
   // "wild" mode allows all http requests, records none, plays back none
   if (mode === MODES.WILD) {
-    print("Not intercepting any requests in 'wild' mode");
+    log("Not intercepting any requests in 'wild' mode");
     return;
   }
 
@@ -130,11 +135,11 @@ function createNockFixturesTestWrapper(options = {}) {
       // load pre-recorded fixture file if it exists
       try {
         fixture = JSON.parse(readFileSync(fixtureFilepath()));
-        print(yellow(`loaded nock fixture file: ${fixtureFilepath()}`));
+        logVerbose(yellow(`loaded nock fixture file: ${fixtureFilepath()}`));
       } catch (err) {
         fixture = {};
         if (err.code !== 'ENOENT') {
-          print(
+          log(
             red(
               `Error parsing fixture file:\nFile:\n\t${fixtureFilepath()}\nError message:\n\t${
                 err.message
@@ -188,7 +193,7 @@ function createNockFixturesTestWrapper(options = {}) {
         // define mocks from previously recorded fixture
         const recordings = fixture[uniqueTestName()] || [];
         nock.define(recordings);
-        print(
+        logVerbose(
           yellow(
             `Defined (${
               recordings.length
@@ -199,7 +204,7 @@ function createNockFixturesTestWrapper(options = {}) {
       finish() {
         // report about unmatched requests
         if (unmatched.length) {
-          print(yellow(`${unmatched.length} unmatched requests`));
+          log(yellow(`${unmatched.length} unmatched requests`));
         }
       },
       cleanup() {},
@@ -212,7 +217,7 @@ function createNockFixturesTestWrapper(options = {}) {
         // define mocks from previously recorded fixture
         const recordings = fixture[uniqueTestName()] || [];
         nock.define(recordings);
-        print(
+        logVerbose(
           yellow(
             `Defined (${
               recordings.length
@@ -248,7 +253,7 @@ function createNockFixturesTestWrapper(options = {}) {
         if (recordings.length > 0) {
           fixture[uniqueTestName()] = recordings;
           // message what happened
-          print(yellow(`Recorded ${recordings.length} request(s)`));
+          logVerbose(yellow(`Recorded ${recordings.length} request(s)`));
         } else if (has(fixture, uniqueTestName())) {
           delete fixture[uniqueTestName()];
         }
@@ -260,7 +265,7 @@ function createNockFixturesTestWrapper(options = {}) {
           ...allJasmineTestResults.map(result => uniqueTestName(result))
         ).forEach(name => {
           delete fixture[name];
-          print(yellow(`Removed obsolete fixture entry for ${name}`));
+          logVerbose(yellow(`Removed obsolete fixture entry for ${name}`));
         });
 
         // Save it: write the recordings to disk
@@ -280,7 +285,7 @@ function createNockFixturesTestWrapper(options = {}) {
             JSON.stringify(sortedFixture, null, 2)
           );
           // message what happened
-          print(
+          logVerbose(
             yellow(`Wrote recordings to fixture file: ${fixtureFilepath()}`)
           );
           return;
@@ -290,14 +295,14 @@ function createNockFixturesTestWrapper(options = {}) {
         // when nothing was captured in the recordings
         if (existsSync(fixtureFilepath())) {
           // cleanup obsolete nock fixture file and dir if they exist
-          print(yellow(`Nothing recorded, removing ${fixtureFilepath()}`));
+          logVerbose(yellow(`Nothing recorded, removing ${fixtureFilepath()}`));
           // remove the fixture file
           unlinkSync(fixtureFilepath());
           // remove the directory if not empty
           try {
             rmdirSync(fixtureDir());
             // message what happened
-            print(
+            logVerbose(
               yellow(
                 `Removed ${fixtureDir()} directory because no fixtures were left.`
               )
