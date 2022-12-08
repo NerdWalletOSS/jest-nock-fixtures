@@ -1,3 +1,7 @@
+## 2.1.0 (2022-12-08)
+
+- Move many logs behind a `JEST_NOCK_FIXTURES_VERBOSE` environment variable flag
+
 ## 2.0.0 (2021-03-31) benjroy
 
 - BREAKING: changed chape of fixture file to store recordings per test.
