@@ -7,7 +7,7 @@ jest-nock-fixtures is a wrapper for a jest testing environment. It uses `nock` t
 npm install @nerdwallet/jest-nock-fixtures
 ```
 
-## Setup
+## Setup and usage
 
 Configure `jest` to setup this wrapper before the tests in each test file are executed.  In `jest@24`, this can be achieved by configuring `setupFilesAfterEnv` (https://jestjs.io/docs/en/configuration#setupfilesafterenv-array)
 
@@ -58,7 +58,7 @@ then configure jest to activate `@nerdwallet/jest-nock-fixtures` and wrap each t
 }
 ```
 
-#### Modes
+### Modes
 
 Available modes:
 - `dryrun`: The default, use recorded nocks, allow new http calls, doesn't record anything, useful for writing new tests
@@ -93,6 +93,14 @@ npm run test:record
 # commit and push the added/changed `__nocks__/*.json` fixture files
 
 # and then in CI enjoy peace of mind for consistent and reproducable test runs in the context of network requests
+```
+
+### Log levels
+
+By default, minimal logs will be printed. To increase the verbosity of the logs, set `JEST_NOCK_FIXTURES_VERBOSE` when running tests. For example:
+
+```sh
+JEST_NOCK_FIXTURES_VERBOSE=1 npm run test
 ```
 
 ## Developing
